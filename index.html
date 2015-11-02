@@ -1,19 +1,19 @@
 ---
 layout: workshop
 root: .
-venue: FIXME      # brief name of host site without address (e.g., "Euphoric State University")
-address: FIXME    # street address of workshop (e.g., "123 Forth Street, Blimingen, Euphoria")
-country: FIXME    # country (lowercase two-letter ISO code such as "fr" - see https://en.wikipedia.org/wiki/ISO_3166-1)
-language: FIXME   # language (lowercase two-letter ISO code such as "fr" - see https://en.wikipedia.org/wiki/ISO_639-1)
-latlng: FIXME     # fractional latitude and longitude (e.g., "41.7901128,-87.6007318"; you can use http://www.latlong.net/)
-humandate: FIXME  # human-readable date (e.g., "Feb 17-18, 2020")
-humantime: FIXME  # human-readable time (e.g., "9:00 am - 4:30 pm")
-startdate: FIXME  # use YYYY-MM-DD format like "2015-01-01"
-enddate: FIXME    # use YYYY-MM-DD format like" 2015-01-02"
-instructor: FIXME # list of names like ["Kay McNulty", "Betty Jennings", "Betty Snyder"]
-helper: FIXME     # list of names like ["Marlyn Wescoff", "Fran Bilas", "Ruth Lichterman"]
-contact: FIXME    # contact email address for workshop organizer, such as "grace@hopper.org"
-etherpad:         # optional (insert the URL for your Etherpad if you're using one)
+venue: "USGS Flagstaff Science Campus"      # brief name of host site without address (e.g., "Euphoric State University")
+address: "2255 N. Gemini Dr., Flagstaff, Arizona"    # street address of workshop (e.g., "123 Forth Street, Blimingen, Euphoria")
+country: "us"    # country (lowercase two-letter ISO code such as "fr" - see https://en.wikipedia.org/wiki/ISO_3166-1)
+language: "en"   # language (lowercase two-letter ISO code such as "fr" - see https://en.wikipedia.org/wiki/ISO_639-1)
+latlng: "35.214407,-111.634113"     # fractional latitude and longitude (e.g., "41.7901128,-87.6007318"; you can use http://www.latlong.net/)
+humandate: "Feb 4-5, 2016"  # human-readable date (e.g., "Feb 17-18, 2020")
+humantime: "9:00 am - 5:00 pm"  # human-readable time (e.g., "9:00 am - 4:30 pm")
+startdate: "2016-02-04"  # use YYYY-MM-DD format like "2015-01-01"
+enddate: "2016-02-05"    # use YYYY-MM-DD format like" 2015-01-02"
+instructor: ["Mariela Perignon", "Rachel Schwartz"] # list of names like ["Kay McNulty", "Betty Jennings", "Betty Snyder"]
+helper: []     # list of names like ["Marlyn Wescoff", "Fran Bilas", "Ruth Lichterman"]
+contact: ["dbuscombe@usgs.gov", "perignon@colorado.edu"]    # contact email address for workshop organizer, such as "grace@hopper.org"
+etherpad: "http://pad.software-carpentry.org/2016-02-04-flagstaff"        # optional (insert the URL for your Etherpad if you're using one)
 eventbrite:       # optional (insert the alphanumeric key for Eventbrite registration, e.g., "1234567890AB")
 ---
 <!--
@@ -77,7 +77,7 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
 -->
 <p>
   <strong>Who:</strong>
-  The course is aimed at graduate students and other researchers.
+  The course is aimed scientists and engineers affiliated with the USGS.
   <strong>You don't need to have any previous knowledge of the tools that will
     be presented at the workshop.</strong>
 </p>
@@ -152,7 +152,7 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
       <tr> <td>12:00</td>  <td>Lunch break</td> </tr>
       <tr> <td>13:00</td>  <td>Building programs with Python</td> </tr>
       <tr> <td>14:30</td>  <td>Coffee</td> </tr>
-      <tr> <td>16:00</td>  <td>Wrap-up</td> </tr>
+      <tr> <td>16:30</td>  <td>Wrap-up</td> </tr>
     </table>
   </div>
   <div class="col-md-6">
@@ -163,7 +163,7 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
       <tr> <td>12:00</td>  <td>Lunch break</td> </tr>
       <tr> <td>13:00</td>  <td>Managing data with SQL</td> </tr>
       <tr> <td>14:30</td>  <td>Coffee</td> </tr>
-      <tr> <td>16:00</td>  <td>Wrap-up</td> </tr>
+      <tr> <td>16:30</td>  <td>Wrap-up</td> </tr>
     </table>
   </div>
 </div>
@@ -186,7 +186,7 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
 <p>
   <strong>Etherpad:</strong> <a href="{{page.etherpad}}">{{page.etherpad}}</a>.
   <br/>
-  We will use this Etherpad for chatting, taking notes, and sharing URLs and bits of code.
+  We will use this Etherpad for chatting, taking notes, and sharing URLs and bits of code. Keep the etherpad open in your browser during the workshop so you can quickly access it.
 </p>
 {% endif %}
 
@@ -318,10 +318,19 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
   need an up-to-date web browser.
 </p>
 <p>
-  We maintain a list of common issues that occur during installation as a reference for instructors
+Please install the software below even if you already have a working version of Python in your computer. A common set of software assures that everyone is working in the same environment as the instructors and minimizes time lost to troubleshooting.
+</p>
+<p>
+  Please contact <a href='mailto:perignon@colorado.edu'>the instructors</a> if you run into trouble during installation. We also maintain a list of common issues that occur during installation as a reference for instructors
   that may be useful on the
   <a href = "https://github.com/swcarpentry/workshop-template/wiki/Configuration-Problems-and-Solutions">Configuration Problems and Solutions wiki page</a>.
 </p>
+
+<p>
+  Once you are done installing the software listed below,
+  please go to <a href="setup/index.html">this page</a>,
+  which has instructions on how to test that everything was installed correctly. Contact <a href='mailto:perignon@colorado.edu'>the instructors</a> for help if the installation tests fail.
+  </p>
 
 <div id="shell"> <!-- Start of 'shell' section. -->
   <h3>The Bash Shell</h3>
@@ -334,6 +343,7 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
   <div class="row">
     <div class="col-md-4">
       <h4 id="shell-windows">Windows</h4>
+      <p>These instructions will install both Git and Bash (as the application Git Bash).</p>
       <ol>
         <li>Download the Git for Windows <a href="https://git-for-windows.github.io/">installer</a>.</li>
         <li>Run the installer and follow the steps bellow:
@@ -354,8 +364,8 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
               <strong>
                 Select "Use Git from the Windows Command Prompt" and click on "Next".
               </strong>
-                If you forgot to do this programs that you need for the workshop will not work properly.
-                If this happens rerun the installer and select the appropriate option.
+                If you do not select this option, the programs that you need for the workshop will not work properly.
+                If this happens, rerun the installer and select the appropriate option.
             </li>
             <!-- Configuring the line ending conversions -->
             <li>
@@ -378,13 +388,12 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
           </ol>
         </li>
       </ol>
-      <p>This will provide you with both Git and Bash in the Git Bash program.</p>
+      <!-- <p>This will provide you with both Git and Bash in the Git Bash program.</p> -->
     </div>
     <div class="col-md-4">
       <h4 id="shell-macosx">Mac OS X</h4>
       <p>
-        The default shell in all versions of Mac OS X is bash, so no
-        need to install anything.  You access bash from the Terminal
+        All versions of Mac OS X use bash as the default shell, so no installation is necessary.  You access bash from the Terminal
         (found in
         <code>/Applications/Utilities</code>).  You may want to keep
         Terminal in your dock for this workshop.
@@ -393,8 +402,8 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
     <div class="col-md-4">
       <h4 id="shell-linux">Linux</h4>
       <p>
-        The default shell is usually Bash, but if your
-        machine is set up differently you can run it by opening a
+        The default shell in Linux is usually bash. If your
+        machine is set up differently, you can run bash by opening a
         terminal and typing <code>bash</code>.  There is no need to
         install anything.
       </p>
@@ -407,20 +416,18 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
   <h3>Git</h3>
 
   <p>
-    Git is a version control system that lets you track who made changes
-    to what when and has options for easily updating a shared or public
-    version of your code
-    on <a href="https://github.com/">github.com</a>. You will need a
+    Git is a version control system that allows you to track changes made to documents, the author of those changes, and when they were made. It is most often used for coding projects, but almost any type of file can be tracked using git. It is also a powerful collaboration tool and can be used to easily share documents with the public through 
+    <a href="https://github.com/">github.com</a>. You will need a
     <a href="https://help.github.com/articles/supported-browsers/">supported</a>
     web browser (current versions of Chrome, Firefox or Safari,
-    or Internet Explorer version 9 or above).
+    or Internet Explorer version 9 or above, are supported browsers).
   </p>
 
   <div class="row">
     <div class="col-md-4">
       <h4 id="git-windows">Windows</h4>
       <p>
-        Git should be installed on your computer as part of your Bash
+        Git should have installed on your computer as part of your Bash
         install (described above).
       </p>
     </div>
@@ -430,8 +437,7 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
         <strong>For OS X 10.9 and higher</strong>, install Git for Mac
         by downloading and running the most recent "mavericks" installer from
         <a href="http://sourceforge.net/projects/git-osx-installer/files/">this list</a>.
-        After installing Git, there will not be anything in your <code>/Applications</code> folder,
-        as Git is a command line program.
+        Git is a command line program, so this installation won't create any new files in the <code>/Applications</code> folder.
         <strong>For older versions of OS X (10.5-10.8)</strong> use the
         most recent available installer labelled "snow-leopard"
         <a href="http://sourceforge.net/projects/git-osx-installer/files/">available here</a>.
@@ -440,7 +446,7 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
     <div class="col-md-4">
       <h4 id="git-linux">Linux</h4>
       <p>
-        If Git is not already available on your machine you can try to
+        If Git is not already available on your machine, you should
         install it via your distro's package manager. For Debian/Ubuntu run
         <code>sudo apt-get install git</code> and for Fedora run
         <code>sudo yum install git</code>.
@@ -450,12 +456,15 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
 </div> <!-- End of 'Git' section. -->
 
 <div id="editor"> <!-- Start of 'editor' section. -->
-  <h3>Text Editor</h3>
+  <h3>Text Editors</h3>
 
   <p>
-    When you're writing code, it's nice to have a text editor that is
-    optimized for writing code, with features like automatic
-    color-coding of key words.  The default text editor on Mac OS X and
+    The text editors most of us regularly use are not optimized for writing code. An editor with features like automatic
+    color-coding of key words and language-specific commenting make code much easier to read and edit, greatly increasing your productivity as a programmer and reducing frustration. We suggest you install one of several code-friendly text editors, but any simple text editor (that can save as plain text) will work.
+    
+    There are also many situations where you might need to use a text editor within the command line. These programs don't have a GUI (Graphical User Interface) -- you interact with them exclusively by typing into the terminal. The text editor nano is easy to use and the one that instructors will use in the workshop.
+    
+    The default text editor on Mac OS X and
     Linux is usually set to Vim, which is not famous for being
     intuitive.  if you accidentally find yourself stuck in it, try
     typing the escape key, followed by <code>:q!</code> (colon, lower-case 'q',
@@ -466,29 +475,30 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
     <div class="col-md-4">
       <h4 id="editor-windows">Windows</h4>
       <p>
-        nano is a basic editor and the default that instructors use in the workshop.
-        To install it, 
+        To install nano, 
         download the <a href="{{site.swc_installer}}">Software Carpentry Windows installer</a>
         and double click on the file to run it.
         <strong>This installer requires an active internet connection.</strong>
       </p>
       <p>
-        Others editors that you can use are
+        If you want to install a text editor optimized for code, you can use 
         <a href="http://notepad-plus-plus.org/">Notepad++</a> or
         <a href="http://www.sublimetext.com/">Sublime Text</a>.
-        <strong>Be aware that you must
-          add its installation directory to your system path.</strong>
-        Please ask your instructor to help you do this.
       </p>
     </div>
     <div class="col-md-4">
       <h4 id="editor-macosx">Mac OS X</h4>
       <p>
-        nano is a basic editor and the default that instructors use in the workshop.
-        It should be pre-installed.
+        The default text editor on Mac OS X and
+    Linux is usually set to Vim, which is not famous for being
+    intuitive. If you accidentally find yourself stuck in it, try
+    typing the escape key, followed by <code>:q!</code> (colon, lower-case 'q',
+    exclamation mark), then hitting Return to return to the shell.
+        
+       The text editor nano should be pre-installed in Mac OS X.
       </p>
       <p>
-        Others editors that you can use are
+        If you want to install a text editor optimized for code, you can use 
         <a href="http://www.barebones.com/products/textwrangler/">Text Wrangler</a> or
         <a href="http://www.sublimetext.com/">Sublime Text</a>.
       </p>
@@ -496,11 +506,16 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
     <div class="col-md-4">
       <h4 id="editor-linux">Linux</h4>
       <p>
-        nano is a basic editor and the default that instructors use in the workshop.
-        It should be pre-installed.
+        The default text editor on Mac OS X and
+    Linux is usually set to Vim, which is not famous for being
+    intuitive. If you accidentally find yourself stuck in it, try
+    typing the escape key, followed by <code>:q!</code> (colon, lower-case 'q',
+    exclamation mark), then hitting Return to return to the shell.
+        
+       The text editor nano should be pre-installed in Mac OS X.
       </p>
       <p>
-        Others editors that you can use are
+        If you want to install a text editor optimized for code, you can use 
         <a href="https://wiki.gnome.org/Apps/Gedit">Gedit</a>,
         <a href="http://kate-editor.org/">Kate</a> or
         <a href="http://www.sublimetext.com/">Sublime Text</a>.
@@ -519,20 +534,18 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
     <a href="http://python.org">Python</a> is a popular language for
     scientific computing, and great for general-purpose programming as
     well.  Installing all of its scientific packages individually can be
-    a bit difficult, so we recommend
+    a bit difficult, so we use
     <a href="https://www.continuum.io/anaconda">Anaconda</a>,
-    an all-in-one installer.
+    an all-in-one installer. Make sure you install Python version 2.7.
   </p>
 
     <p>
-      Regardless of how you choose to install it,
-      <strong>please make sure you install Python version 3.x</strong>
-      (e.g., 3.4 is fine).
+      <strong>Please install Anaconda even if you already have a working version of Python</strong> on your computer. Using a common environment helps workshops run smoothly and facilitate learning. It is easy to uninstall Anaconda after the workshop if you choose to not use it.
     </p>
 
     <p>
       We will teach Python using the IPython notebook, a programming environment
-      that runs in a web browser. For this to work you will need a reasonably
+      that runs in a web browser. You will need a reasonably
       up-to-date browser. The current versions of the Chrome, Safari and
       Firefox browsers are all <a
       href='http://ipython.org/ipython-doc/2/install/install.html#browser-compatibility'>supported</a>
@@ -545,16 +558,16 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
       <h4 id="python-windows">Windows</h4>
       <ol>
         <li>Open <a href="http://continuum.io/downloads">http://continuum.io/downloads</a> with your web browser.</li>
-        <li>Download the Python 3 installer for Windows.</li>
-        <li>Install Python 3 using all of the defaults for installation <em>except</em> make sure to check <strong>Make Anaconda the default Python</strong>.</li>
+        <li>Download the Python 2.7 installer for Windows.</li>
+        <li>Install Python 2.7 using all of the defaults for installation <em>except</em> make sure to check <strong>Make Anaconda the default Python</strong>.</li>
       </ol>
     </div>
     <div class="col-md-4">
       <h4 id="python-macosx">Mac OS X</h4>
       <ol>
         <li>Open <a href="http://continuum.io/downloads">http://continuum.io/downloads</a> with your web browser.</li>
-        <li>Download the Python 3 installer for OS X.</li>
-        <li>Install Python 3 using all of the defaults for installation.</li>
+        <li>Download the Python 2.7 installer for OS X.</li>
+        <li>Install Python 2.7 using all of the defaults for installation.</li>
       </ol>
     </div>
     <div class="col-md-4">
@@ -562,11 +575,11 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
       </p>
       <ol>
         <li>Open <a href="http://continuum.io/downloads">http://continuum.io/downloads</a> with your web browser.</li>
-        <li>Download the Python 3 installer for Linux.</li>
-        <li>Install Python 3 using all of the defaults for installation.
+        <li>Download the Python 2.7 installer for Linux.</li>
+        <li>Install Python 2.7 using all of the defaults for installation.
         (Installation requires using the shell. If you aren't
         comfortable doing the installation yourself
-        stop here and request help at the workshop.)</li>
+        stop here and request help from the instructors, preferably before the workshop!).</li>
         <li>
           Open a terminal window.
         </li>
@@ -587,14 +600,10 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
       </ol>
     </div>
   </div>
-  <p>
-  Once you are done installing the software listed above,
-  please go to <a href="setup/index.html">this page</a>,
-  which has instructions on how to test that everything was installed correctly.
-  </p>
 </div> <!-- End of 'Python' section. -->
 
-<div id="r"> <!-- Start of 'R' section. -->
+<!-- 
+<div id="r"> <!~~ Start of 'R' section. ~~>
   <h3>R</h3>
 
   <p>
@@ -637,7 +646,8 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
       </p>
     </div>
   </div>
-</div> <!-- End of 'R' section. -->
+</div> <!~~ End of 'R' section. ~~>
+ -->
 
 <div id="sql"> <!-- Start of 'SQLite' section. -->
   <h3>SQLite</h3>
@@ -654,7 +664,7 @@ eventbrite:       # optional (insert the alphanumeric key for Eventbrite registr
       <p>
         The <a href="{{site.swc_github}}/windows-installer">Software Carpentry Windows Installer</a>
         installs SQLite for Windows.
-        If you used the installer to configure nano, you don't need to run it again.
+        You don't need to run the installer again if you used it to install nano.
       </p>
     </div>
     <div class="col-md-4">
