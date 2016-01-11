@@ -12,19 +12,15 @@ minutes: 30
 
 A [relational database](reference.html#relational-database)
 is a way to store and manipulate information. 
-Databases are arranged as [tables](reference.html#table).
-Each table has columns (also known as [fields](reference.html#field)) that describe the data,
-and rows (also known as [records](reference.html#record)) which contain the data.
+Databases are arranged as a collection of [tables](reference.html#table).
+Each table has columns (the [fields](reference.html#field)) that describe the data,
+and rows (the [records](reference.html#record)) which contain the data.
 
-When we are using a spreadsheet,
-we put formulas into cells to calculate new values based on old ones.
-When we are using a database,
+When using a database,
 we send commands
 (usually called [queries](reference.html#query))
-to a [database manager](reference.html#database-manager):
-a program that manipulates the database for us.
-The database manager does whatever lookups and calculations the query specifies,
-returning the results in a tabular form
+to a [database manager](reference.html#database-manager). The database manager is
+a program that manipulates the database for us. It does whatever lookups and calculations the query specifies and returns the results in a tabular form
 that we can then use as a starting point for further queries.
 
 > ## Changing database managers {.callout}
@@ -34,7 +30,7 @@ that we can then use as a starting point for further queries.
 > data in a different way,
 > so a database created with one cannot be used directly by another.
 > However,
-> every database manager can import and export data in a variety of formats, like .csv,
+> every database manager can import and export data in a variety of formats like .csv,
 > so it *is* possible to move information from one to another.
 
 Queries are written in a language called [SQL](reference.html#sql),

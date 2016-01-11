@@ -6,7 +6,7 @@ subtitle: Discussion
 
 ## Setup
 
-For the SQL lessons, 
+For these SQL lessons, 
 we will use the [SQLite](https://www.sqlite.org/) relational database management system, 
 which comes pre-installed on most operating systems. 
 While these instructions are specific to SQLite,
@@ -27,7 +27,7 @@ directory.
 
     $ mkdir swc_sql 
     $ cd swc_sql
-    $ wget http://files.software-carpentry.org/survey.db
+    $ curl http://files.software-carpentry.org/survey.db > survey.db
 
 
 First, load the example database into SQLite. 

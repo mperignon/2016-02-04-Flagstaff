@@ -7,12 +7,13 @@ William Dyer,
 Frank Pabodie,
 and Valentina Roerich led expeditions to the
 [Pole of Inaccessibility](http://en.wikipedia.org/wiki/Pole_of_inaccessibility)
-in the South Pacific,
+in the South Pacific
 and then onward to Antarctica.
 Two years ago,
-their expeditions were found in a storage locker at Miskatonic University.
-We have scanned and [OCR][]'d the data they contain,
-and we now want to store that information
+records from their expeditions were found in a storage locker at Miskatonic University.
+
+We have scanned and [OCR][]'d their data
+and now want to store that information
 in a way that will make search and analysis easy.
 
 Three common options for storage are
@@ -21,11 +22,11 @@ spreadsheets,
 and databases.
 Text files are easiest to create,
 and work well with version control,
-but then we would have to build search and analysis tools ourselves.
-Spreadsheets are good for doing simple analyses,
+but we would need to build our own tools to manage and analyze the data.
+Spreadsheets are good for doing simple analyses
 but they don't handle large or complex data sets well.
-Databases, however, include powerful tools for search and analysis,
-and can handle large, complex data sets.
+Databases, however, include powerful tools for search and analysis
+and can handle large, complex data sets with ease.
 These lessons will show how to use a database to explore the expeditions' data.
 
 > ## Prerequisites {.prereq}
