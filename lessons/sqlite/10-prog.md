@@ -18,7 +18,7 @@ library and function names may differ,
 but the concepts are the same.
 
 Here's a short Python program that selects latitudes and longitudes
-from an SQLite database stored in a file called `survey.db`:
+from an SQLite database stored in the file called `survey.db`:
 
 ~~~ {.python}
 import sqlite3
@@ -166,6 +166,25 @@ The library matches values to question marks in order,
 and translates any special characters in the values
 into their escaped equivalents
 so that they are safe to use.
+
+> ## Generating Insert Statements {.challenge}
+>
+> One of our colleagues has sent us a [CSV](reference.html#comma-separated-values) file containing
+> temperature readings by Robert Olmstead, which is formatted like
+> this:
+>
+> ~~~ {.output}
+> Taken,Temp
+> 619,-21.5
+> 622,-15.5
+> ~~~
+>
+> Write a small Python program that reads this file in and prints out
+> the SQL `INSERT` statements needed to add these records to the
+> survey database.  Note: you will need to add an entry for Olmstead
+> to the `Person` table.  If you are testing your program repeatedly,
+> you may want to investigate SQL's `INSERT or REPLACE` command.
+
 
 > ## Filling a Table vs. Printing Values {.challenge}
 >

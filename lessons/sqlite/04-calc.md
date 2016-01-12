@@ -31,11 +31,12 @@ SELECT 1.05 * reading FROM Survey WHERE quant='rad';
 |11.8125       |
 
 When we run the query,
-the expression `1.05 * reading` is evaluated for each row.
+the expression `1.05 * reading` is evaluated for each row and displayed, 
+although the entries in the database remain unchanged.
 Expressions can use any of the fields,
 all of usual arithmetic operators,
-and a variety of common functions.
-(Exactly which ones depends on which database manager is being used.)
+and a variety of common functions
+(Exactly which ones depends on which database manager is being used).
 For example,
 we can convert temperature readings from Fahrenheit to Celsius
 and round to two decimal places:
@@ -51,8 +52,7 @@ SELECT taken, round(5*(reading-32)/9, 2) FROM Survey WHERE quant='temp';
 |751  |-28.06                     |
 |752  |-26.67                     |
 
-We can also combine values from different fields,
-for example by using the string concatenation operator `||`:
+We can also combine values from different fields to create new strings by using the string concatenation operator `||`:
 
 ~~~ {.sql}
 SELECT personal || ' ' || family FROM Person;
@@ -66,31 +66,51 @@ SELECT personal || ' ' || family FROM Person;
 |Valentina Roerich        |
 |Frank Danforth           |
 
+Beware! These operators will work on any field regardless of type, and the answers they give
+might be meaningless (Remember than in SQLite dates are strings).
+
+~~~ {.sql}
+SELECT 2 * dated FROM Visited;
+~~~
+
+|2 * dated|
+|-------------------------|
+|3854 |
+|3854|
+|3878|
+|3860|
+|3860|
+| |
+|3864|
+|3864|
+
 > ## Fixing Salinity Readings {.challenge}
 >
 > After further reading,
 > we realize that Valentina Roerich
 > was reporting salinity as percentages.
-> Write a query that returns all of her salinity measurements
+> Write a query that returns Roerich's salinity measurements
 > from the `Survey` table
 > with the values divided by 100.
 
-> ## Unions {.challenge}
->
-> The `UNION` operator combines the results of two queries:
->
-> ~~~ {.sql}
-> SELECT * FROM Person WHERE ident='dyer' UNION SELECT * FROM Person WHERE ident='roe';
-> ~~~
->
-> |ident|personal |family |
-> |-----|-------- |-------|
-> |dyer |William  |Dyer   |
-> |roe  |Valentina|Roerich|
->
+## Unions {.challenge}
+
+The `UNION` operator combines the results of two queries:
+
+~~~ {.sql}
+SELECT * FROM Person WHERE ident='dyer' UNION SELECT * FROM Person WHERE ident='roe';
+~~~
+
+|ident|personal |family |
+|-----|-------- |-------|
+|dyer |William  |Dyer   |
+|roe  |Valentina|Roerich|
+
+> ## Displaying Salinity {.challenge}
 > Use `UNION` to create a consolidated list of salinity measurements
 > in which Roerich's, and only Roerich's,
-> have been corrected as described in the previous challenge.
+> have been corrected as described in the previous challenge
+> (the operator for "not equal" is `!=`).
 > The output should be something like:
 >
 > |taken|reading|
@@ -103,28 +123,3 @@ SELECT personal || ' ' || family FROM Person;
 > |752  |0.416  |
 > |837  |0.21   |
 > |837  |0.225  |
-
-> ## Selecting Major Site Identifiers {.challenge}
->
-> The site identifiers in the `Visited` table have two parts
-> separated by a '-':
->
-> ~~~ {.sql}
-> SELECT DISTINCT site FROM Visited;
-> ~~~
->
-> |site |
-> |-----|
-> |DR-1 |
-> |DR-3 |
-> |MSK-4|
->
-> Some major site identifiers are two letters long and some are three.
-> The "in string" function `instr(X, Y)`
-> returns the 1-based index of the first occurrence of string Y in string X,
-> or 0 if Y does not exist in X.
-> The substring function `substr(X, I, [L])`
-> returns the substring of X starting at index I, with an optional length L.
-> Use these two functions to produce a list of unique major site identifiers.
-> (For this data,
-> the list should contain only "DR" and "MSK").

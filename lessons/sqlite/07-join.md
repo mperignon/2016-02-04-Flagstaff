@@ -12,18 +12,17 @@ minutes: 30
 > *   Explain what primary and foreign keys are, and why they are useful.
 
 In order to submit her data to a web site
-that aggregates historical meteorological data,
+that distributes historical meteorological data,
 Gina needs to format it as
 latitude, longitude, date, quantity, and reading.
 However,
 her latitudes and longitudes are in the `Site` table,
 while the dates of measurements are in the `Visited` table
 and the readings themselves are in the `Survey` table.
-She needs to combine these tables somehow.
+She needs to combine these tables to create the dataset she will submit.
 
 The SQL command to do this is `JOIN`.
-To see how it works,
-let's start by joining the `Site` and `Visited` tables:
+Let's start by joining the `Site` and `Visited` tables:
 
 ~~~ {.sql}
 SELECT * FROM Site JOIN Visited;
@@ -69,12 +68,10 @@ And since each table has three fields,
 the output has six fields (3 + 3 = 6).
 
 What the join *hasn't* done is
-figure out if the records being joined have anything to do with each other.
-It has no way of knowing whether they do or not until we tell it how.
-To do that,
-we add a clause specifying that
-we're only interested in combinations that have the same site name,
-thus we need to use a filter:
+figure out if the records being joined should actually be together.
+We need to add a clause specifying that
+we're only interested in combinations that have the same site name
+by using a filter:
 
 ~~~ {.sql}
 SELECT * FROM Site JOIN Visited ON Site.name=Visited.site;
@@ -95,23 +92,25 @@ SELECT * FROM Site JOIN Visited ON Site.name=Visited.site;
 and for all the queries in this lesson you can use them interchangeably.
 There are differences in how they affect [outer joins][OUTER],
 but that's beyond the scope of this lesson.
+
 Once we add this to our query,
 the database manager throws away records
-that combined information about two different sites,
+that combine information about two different sites,
 leaving us with just the ones we want.
 
-Notice that we used `Table.field` to specify field names
+Notice that we used the syntax `Table.field` to specify field names
 in the output of the join.
 We do this because tables can have fields with the same name,
-and we need to be specific which ones we're talking about.
+and we need to be specific bout which ones we're talking about.
 For example,
 if we joined the `Person` and `Visited` tables,
 the result would inherit a field called `ident`
-from each of the original tables.
+from each of the original tables, so we have to refer to them as `Person.ident`
+and `Visited.ident`.
 
 We can now use the same dotted notation
 to select the three columns we actually want
-out of our join:
+in the output:
 
 ~~~ {.sql}
 SELECT Site.lat, Site.long, Visited.dated
@@ -130,11 +129,8 @@ ON     Site.name=Visited.site;
 |-47.15|-126.72|1930-01-07|
 |-48.87|-123.4 |1932-01-14|
 
-If joining two tables is good,
-joining many tables must be better.
-In fact,
-we can join any number of tables
-simply by adding more `JOIN` clauses to our query,
+We can join any number of tables
+simply by adding more `JOIN` clauses to our query
 and more `ON` tests to filter out combinations of records
 that don't make sense:
 
@@ -171,8 +167,8 @@ correspond with each other
 because those tables contain
 [primary keys](reference.html#primary-key)
 and [foreign keys](reference.html#foreign-key).
-A primary key is a value,
-or combination of values,
+A primary key is a value
+(or combination of values)
 that uniquely identifies each record in a table.
 A foreign key is a value (or combination of values) from one table
 that identifies a unique record in another table.
@@ -193,9 +189,9 @@ we only need to make one change in one place.
 One easy way to do this is
 to create an arbitrary, unique ID for each record
 as we add it to the database.
-This is actually very common:
+This is very common:
 those IDs have names like "student numbers" and "patient numbers",
-and they almost always turn out to have originally been
+and they almost always correspond to
 a unique record identifier in some database system or other.
 As the query below demonstrates,
 SQLite [automatically numbers records][rowid] as they're added to tables,
@@ -223,7 +219,7 @@ SELECT rowid, * FROM Person;
 
 > ## Reading Queries {.challenge}
 >
-> Describe in your own words what the following query produces:
+> Describe what the following query produces:
 >
 > ~~~ {.sql}
 > SELECT Site.name FROM Site JOIN Visited
@@ -234,7 +230,7 @@ SELECT rowid, * FROM Person;
 >
 > Write a query that shows each site with exact location (lat, long) ordered by visited date,
 > followed by personal name and family name of the person who visited the site
-> and the type of measurement taken and its reading. Please avoid all null values.
+> and the type of measurement taken and its reading. Avoid all null values.
 > Tip: you should get 15 records with 8 fields.
 
 [OUTER]: http://en.wikipedia.org/wiki/Join_%28SQL%29#Outer_join

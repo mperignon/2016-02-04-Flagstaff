@@ -65,8 +65,8 @@ SELECT * FROM Visited WHERE dated>='1930-01-01';
 |837  |MSK-|1932-01-14|
 |844  |DR-1|1932-03-22|
 
-we get five,
-but record #752 isn't in either set of results.
+we get five results. Record #752 isn't in either set of results.
+
 The reason is that
 `null<'1930-01-01'`
 is neither true nor false:
@@ -78,7 +78,7 @@ the value of `null<'1930-01-01'`
 is actually `null`.
 `null>='1930-01-01'` is also null
 because we can't answer to that question either.
-And since the only records kept by a `WHERE`
+Since the only records kept by a `WHERE`
 are those for which the test is true,
 record #752 isn't included in either set of results.
 
@@ -101,7 +101,7 @@ SELECT * FROM Visited WHERE dated!=NULL;
 ~~~
 
 To check whether a value is `null` or not,
-we must use a special test `IS NULL`:
+we must use the special test `IS NULL`:
 
 ~~~ {.sql}
 SELECT * FROM Visited WHERE dated IS NULL;
@@ -130,7 +130,7 @@ SELECT * FROM Visited WHERE dated IS NOT NULL;
 Null values can cause headaches wherever they appear.
 For example,
 suppose we want to find all the salinity measurements
-that weren't taken by Lake.
+that were taken by people other than Lake.
 It's natural to write the query like this:
 
 ~~~ {.sql}
@@ -149,7 +149,7 @@ where we don't know who took the measurement.
 Once again,
 the reason is that when `person` is `null`,
 the `!=` comparison produces `null`,
-so the record isn't kept in our results.
+so the entry isn't kept in our results.
 If we want to keep these records
 we need to add an explicit check:
 
@@ -165,12 +165,8 @@ SELECT * FROM Survey WHERE quant='sal' AND (person!='lake' OR person IS NULL);
 |752  |roe   |sal  |41.6   |
 |837  |roe   |sal  |22.5   |
 
-We still have to decide whether this is the right thing to do or not.
-If we want to be absolutely sure that
-we aren't including any measurements by Lake in our results,
-we need to exclude all the records for which we don't know who did the work.
 
-In contrast to arithmetic or Boolean operators, aggregation functions that combine multiple values, such as `min`, `max` or `avg`, *ignore* `null` values. In the majority of cases, this is a desirable output: for example, unknown values are thus not affecting our data when we are averaging it. Aggregation functions will be addressed in more detail in [the next section](06-agg.html).
+In contrast to arithmetic or Boolean operators, aggregation functions (such as `min`, `max` or `avg`) that combine multiple values, *ignore* `null`. In the majority of cases, this is a desirable behavior: we wouldn't want unknown values affecting our calculations on the data. Aggregation functions will be addressed in more detail in [the next section](06-agg.html).
 
 > ## Sorting by Known Date {.challenge}
 >
@@ -180,23 +176,23 @@ In contrast to arithmetic or Boolean operators, aggregation functions that combi
 
 > ## NULL in a Set {.challenge}
 >
-> What do you expect the query:
+> What do you expect this query to produce?
 >
 > ~~~ {.sql}
 > SELECT * FROM Visited WHERE dated IN ('1927-02-08', NULL);
 > ~~~
 >
-> to produce?
-> What does it actually produce?
+> How would you write a query to perform the intended task?
 
 > ## Pros and Cons of Sentinels {.challenge}
 >
 > Some database designers prefer to use
 > a [sentinel value](reference.html#sentinel-value))
-> to mark missing data rather than `null`.
+> to identify missing data rather than using `null`.
 > For example,
 > they will use the date "0000-00-00" to mark a missing date,
+> -9999 to replace an unknown elevation on a DEM, 
 > or -1.0 to mark a missing salinity or radiation reading
 > (since actual readings cannot be negative).
-> What does this simplify?
+> What benefits might this have?
 > What burdens or risks does it introduce?

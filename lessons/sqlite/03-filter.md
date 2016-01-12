@@ -30,14 +30,14 @@ SELECT * FROM Visited WHERE site='DR-1';
 
 The database manager executes this query in two stages.
 First,
-it checks at each row in the `Visited` table
+it checks each row in the `Visited` table
 to see which ones satisfy the `WHERE`.
 It then uses the column names following the `SELECT` keyword
 to determine which columns to display.
 
 This processing order means that
 we can filter records using `WHERE`
-based on values in columns that aren't then displayed:
+according to values in columns that we are not selecting:
 
 ~~~ {.sql}
 SELECT ident FROM Visited WHERE site='DR-1';
@@ -51,7 +51,9 @@ SELECT ident FROM Visited WHERE site='DR-1';
 
 <img src="fig/sql-filter.svg" alt="SQL Filtering in Action" />
 
-We can use many other Boolean operators to filter our data.
+## The `AND` and `OR` operators
+
+The clause `WHERE` performs a Boolean operation on the data by determining which entries in the table satisfy the condition (are True) and which don't (are False). We can use many other Boolean operators to filter our data and we can combine them for more complex filtering.
 For example,
 we can ask for all information from the DR-1 site collected before 1930:
 
@@ -64,7 +66,7 @@ SELECT * FROM Visited WHERE site='DR-1' AND dated<'1930-01-01';
 |619  |DR-1|1927-02-08|
 |622  |DR-1|1927-02-10|
 
-> ## Date types {.callout}
+> ## Data types for dates and times {.callout}
 >
 > Most database managers have a special data type for dates.
 > In fact, many have two:
@@ -72,18 +74,17 @@ SELECT * FROM Visited WHERE site='DR-1' AND dated<'1930-01-01';
 > such as "May 31, 1971",
 > and one for durations,
 > such as "31 days".
-> SQLite doesn't:
-> instead,
+>
+> SQLite is special:
+> instead of using a special type,
 > it stores dates as either text
 > (in the ISO-8601 standard format "YYYY-MM-DD HH:MM:SS.SSSS"),
 > real numbers
 > (the number of days since November 24, 4714 BCE),
 > or integers
 > (the number of seconds since midnight, January 1, 1970).
-> If this sounds complicated,
-> it is,
-> but not nearly as complicated as figuring out
-> [historical dates in Sweden](http://en.wikipedia.org/wiki/Swedish_calendar).
+> While this all sounds very complicated, being aware of how your particular
+> database manager deals with dates will prevent a lot of headaches later on.
 
 If we want to find out what measurements were taken by either Lake or Roerich,
 we can combine the tests on their names using `OR`:
@@ -105,8 +106,7 @@ SELECT * FROM Survey WHERE person='lake' OR person='roe';
 |837  |roe   |sal  |22.5   |
 |844  |roe   |rad  |11.25  |
 
-Alternatively,
-we can use `IN` to see if a value is in a specific set:
+We can also use the clause `IN` to see if a value is in a specific set:
 
 ~~~ {.sql}
 SELECT * FROM Survey WHERE person IN ('lake', 'roe');
@@ -127,7 +127,7 @@ SELECT * FROM Survey WHERE person IN ('lake', 'roe');
 
 We can combine `AND` with `OR`,
 but we need to be careful about which operator is executed first.
-If we *don't* use parentheses,
+For example, if we *don't* use parentheses,
 we get this:
 
 ~~~ {.sql}
@@ -144,7 +144,7 @@ SELECT * FROM Survey WHERE quant='sal' AND person='lake' OR person='roe';
 |837  |roe   |sal  |22.5   |
 |844  |roe   |rad  |11.25  |
 
-which is salinity measurements by Lake,
+which displays salinity measurements by Lake,
 and *any* measurement by Roerich.
 We probably want this instead:
 
@@ -160,30 +160,6 @@ SELECT * FROM Survey WHERE quant='sal' AND (person='lake' OR person='roe');
 |752  |roe   |sal  |41.6   |
 |837  |lake  |sal  |0.21   |
 |837  |roe   |sal  |22.5   |
-
-We can also filter by partial matches.
-For example,
-if we want to know something just about the site names beginning with "DR" we can use the `LIKE` keyword.
-The percent symbol acts as a [wildcard](reference.html#wildcard),
-matching any characters in that place.
-It can be used at the beginning, middle, or end of the string:
-
-~~~ {.sql}
-SELECT * FROM Visited WHERE site LIKE 'DR%';
-~~~
-
-|ident|site |dated     |
-|-----|-----|----------|
-|619  |DR-1 |1927-02-08|
-|622  |DR-1 |1927-02-10|
-|734  |DR-3 |1930-01-07|
-|735  |DR-3 |1930-01-12|
-|751  |DR-3 |1930-02-26|
-|752  |DR-3 |          |
-|844  |DR-1 |1932-03-22|
-
-
-
 
 Finally,
 we can use `DISTINCT` with `WHERE`
@@ -202,7 +178,7 @@ SELECT DISTINCT person, quant FROM Survey WHERE person='lake' OR person='roe';
 |roe   |rad  |
 
 But remember:
-`DISTINCT` is applied to the values displayed in the chosen columns,
+`DISTINCT` is applied to the combined values in the chosen columns,
 not to the entire rows as they are being processed.
 
 > What we have just done is how most people "grow" their SQL queries.
@@ -224,30 +200,54 @@ not to the entire rows as they are being processed.
 > or write a small program to generate ten thousand random (but plausible) records
 > and use that.
 
-> ## Fix This Query {.challenge}
->
-> Suppose we want to select all sites that lie more than 30 degrees from the poles.
-> Our first query is:
->
-> ~~~ {.sql}
-> SELECT * FROM Site WHERE (lat > -60) OR (lat < 60);
-> ~~~
->
-> Explain why this is wrong,
-> and rewrite the query so that it is correct.
-
 > ## Finding Outliers {.challenge}
 >
 > Normalized salinity readings are supposed to be between 0.0 and 1.0.
 > Write a query that selects all records from `Survey`
 > with salinity values outside this range.
 
+
+## Filtering by partial matches
+
+If we want to know something just about the site names beginning with "DR" we can use the `LIKE` keyword. The `LIKE` operator is used to match text fields against a pattern using [wildcard](reference.html#wildcard). There are two wildcards used with the `LIKE` operator: the percent sign (%) and the underscore (_).
+
+The percent symbol (%) matches zero, one, or multiple numbers or characters at that location in the search pattern. The underscore (_) represents a single number or character. Wildcards can be used at the beginning, middle, or end of the string and can combined in a single string.
+
+~~~ {.sql}
+SELECT * FROM Visited WHERE site LIKE 'DR%';
+~~~
+
+|ident|site |dated     |
+|-----|-----|----------|
+|619  |DR-1 |1927-02-08|
+|622  |DR-1 |1927-02-10|
+|734  |DR-3 |1930-01-07|
+|735  |DR-3 |1930-01-12|
+|751  |DR-3 |1930-02-26|
+|752  |DR-3 |          |
+|844  |DR-1 |1932-03-22|
+
+
 > ## Matching Patterns {.challenge}
 >
 > Which of these expressions are true?
 >
-> * `'a' LIKE 'a'`
-> * `'a' LIKE '%a'`
-> * `'beta' LIKE '%a'`
-> * `'alpha' LIKE 'a%%'`
-> * `'alpha' LIKE 'a%p%'`
+> * `LIKE 'a'` would find `'a'`
+> * `LIKE '%a'` would find `'a'`
+> * `LIKE '%a'` would find `'beta'`
+> * `LIKE '_a'` would find `'a'`
+> * `LIKE 'a%%'` would find `'alpha'`
+> * `LIKE '%a%'` would find `'alpha'`
+> * `LIKE '_a%'` would find `'alpha'`
+> * `LIKE 'a%p%'` would find `'alpha'`
+> * `LIKE 'a%p_'` would find `'alpha'`
+
+> ## Matching dates {.challenge}
+>
+> Write a query that searches the `Visited` table only for entries dated
+>
+> * 1930-01-12
+> * 1932-01-14
+>
+> using the LIKE operator and wildcards. Grow your query gradually until all other
+> entries are removed.

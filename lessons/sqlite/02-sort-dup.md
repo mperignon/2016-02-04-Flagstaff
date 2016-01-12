@@ -12,17 +12,17 @@ minutes: 30
 
 In beginning our examination of the Antarctic data, we want to know:
 
-* what kind of quantity measurements were taken at each site; 
+* what types of measurements were taken at each site; 
 * which scientists took measurements on the expedition;
-* the sites where each scientist took measurements
+* where each scientist took each measurement
 
+## Selecting unique data
 
-To determine which measurements were taken at each site, 
-we can examine the `Survey` table.
+We can examine the `Survey` table to determine which measurements were taken at each site.
 Data is often redundant,
 so queries often return redundant information.
 For example,
-if we select the quantities that have been measured
+if we select the measured quantities
 from the `Survey` table,
 we get this:
 
@@ -55,7 +55,7 @@ SELECT quant FROM Survey;
 <tr><td>rad  </td></tr>
 </table>
 
-This result makes it difficult to see all of the different types of `quant` in the Survey table.
+This result makes it difficult to see the unique types of `quant` listed in the Survey table.
 We can eliminate the redundant output to make the result more readable by adding the `DISTINCT` keyword
 to our query:
 
@@ -70,10 +70,10 @@ SELECT DISTINCT quant FROM Survey;
 <tr><td>temp </td></tr>
 </table>
 
-If we want to determine which sites have which quant measurement, 
+If we want to determine where each type of measurement was collected, 
 we can use the `DISTINCT` keyword on multiple columns.
-If we select more than one column,
-the distinct *pairs* of values are returned:
+If we select two columns,
+the `DISTINCT` keyword returns the unique *pairs* of values in those columns:
 
 ~~~ {.sql}
 SELECT DISTINCT taken, quant FROM Survey;
@@ -104,13 +104,14 @@ SELECT DISTINCT taken, quant FROM Survey;
 Notice in both cases that duplicates are removed
 even if the rows they come from didn't appear to be adjacent in the database table.
 
+## Sorting data
 
-Our next task is to identify the scientists on the expedition by looking at the `Person` table.
+Our next task is to identify the scientists that were on the expedition. Their names are listed in the `Person` table.
 As we mentioned earlier,
 database records are not stored in any particular order.
-This means that query results aren't necessarily sorted,
+This means that query results aren't necessarily sorted in any useful way,
 and even if they are,
-we often want to sort them in a different way,
+we might want to sort them differently,
 e.g., by their identifier instead of by their personal name.
 We can do this in SQL by adding an `ORDER BY` clause to our query:
 
@@ -144,15 +145,13 @@ SELECT * FROM Person ORDER BY ident DESC;
 |dyer   |William  |Dyer    |
 |danfort|Frank    |Danforth|
 
-(And if we want to make it clear that we're sorting in ascending order,
+(And if we want to make it explicit that we're sorting in ascending order,
 we can use `ASC` instead of `DESC`.)
 
 
-In order to look at which scientist measured quantities at each site, 
-we can look again at the `Survey` table.
 We can also sort on several fields at once.
 For example,
-this query sorts results first in ascending order by `taken`,
+this query sorts results from the 'Survey' table first in ascending order by `taken`,
 and then in descending order by `person`
 within each group of equal `taken` values:
 
@@ -183,8 +182,10 @@ SELECT taken, person, quant FROM Survey ORDER BY taken ASC, person DESC;
 |837  |lake  |sal  |
 |844  |roe   |rad  |
 
-This query gives us a good idea of which scientist was at which site, 
+The field `person` is an identifier for the scientist who took each measurement, so this query gives us a good idea of which scientist was at which site 
 and what measurements they performed while they were there.
+
+## Combining clauses
 
 Looking at the table, 
 it seems like some scientists specialized in certain kinds of measurements. 
@@ -210,7 +211,7 @@ SELECT DISTINCT quant, person FROM Survey ORDER BY quant ASC;
 
 > ## Finding Distinct Dates {.challenge}
 >
-> Write a query that selects distinct dates from the `Visited` table.
+> Write a query that selects unique dates from the `Visited` table and sorts them in ascending order.
 
 > ## Displaying Full Names {.challenge}
 >

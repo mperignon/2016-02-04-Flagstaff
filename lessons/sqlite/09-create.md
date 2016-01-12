@@ -6,11 +6,11 @@ minutes: 30
 ---
 > ## Learning Objectives {.objectives}
 >
-> *   Write statements that creates tables.
+> *   Write statements that create tables.
 > *   Write statements to insert, modify, and delete records.
 
 So far we have only looked at how to get information out of a database,
-both because that is more frequent than adding information,
+both because it's the operation you'll do most frequenlty
 and because most other operations only make sense
 once queries are understood.
 If we want to create and modify data,
@@ -19,22 +19,19 @@ we need to know two other sets of commands.
 The first pair are [`CREATE TABLE`][CREATE-TABLE] and [`DROP TABLE`][DROP-TABLE].
 While they are written as two words,
 they are actually single commands.
-The first one creates a new table;
+The first one creates a new table and
 its arguments are the names and types of the table's columns.
 For example,
-the following statements create the four tables in our survey database:
+the following statement creates a new table in our survey database:
 
 ~~~ {.sql}
-CREATE TABLE Person(ident TEXT, personal TEXT, family TEXT);
-CREATE TABLE Site(name TEXT, lat REAL, long REAL);
-CREATE TABLE Visited(ident INTEGER, site TEXT, dated TEXT);
-CREATE TABLE Survey(taken INTEGER, person TEXT, quant REAL, reading REAL);
+CREATE TABLE SecondSurvey(taken INTEGER, person TEXT, quant TEXT, reading REAL);
 ~~~
 
 We can get rid of one of our tables using:
 
 ~~~ {.sql}
-DROP TABLE Survey;
+DROP TABLE SecondSurvey;
 ~~~
 
 Be very careful when doing this:
@@ -42,7 +39,7 @@ most databases have some support for undoing changes,
 but it's better not to have to rely on it.
 
 Different database systems support different data types for table columns,
-but most provide the following:
+but most use the following:
 
 data type  use
 ---------  -----------------------------------------
@@ -52,9 +49,9 @@ TEXT       a character string
 BLOB       a "binary large object", such as an image
 
 Most databases also support Booleans and date/time values;
-SQLite uses the integers 0 and 1 for the former,
-and represents the latter as discussed [earlier](#a:dates).
-An increasing number of databases also support geographic data types,
+SQLite uses the integers 0 and 1 for Booleans,
+and represents the dates as discussed [earlier](#a:dates).
+An increasing number of databases also support geographic data types
 such as latitude and longitude.
 Keeping track of what particular systems do or do not offer,
 and what names they give different data types,
@@ -63,13 +60,13 @@ is an unending portability headache.
 When we create a table,
 we can specify several kinds of constraints on its columns.
 For example,
-a better definition for the `Survey` table would be:
+a better definition for the `SecondSurvey` table would be:
 
 ~~~ {.sql}
-CREATE TABLE Survey(
+CREATE TABLE SecondSurvey(
     taken   integer not null, -- where reading taken
     person  text,             -- may not know who took it
-    quant   real not null,    -- the quantity measured
+    quant   text not null,    -- the quantity measured
     reading real not null,    -- the actual reading
     primary key(taken, quant),
     foreign key(taken) references Visited(ident),
@@ -89,15 +86,18 @@ we can add, change, and remove records using our other set of commands,
 The simplest form of `INSERT` statement lists values in order:
 
 ~~~ {.sql}
-INSERT INTO Site values('DR-1', -49.85, -128.57);
-INSERT INTO Site values('DR-3', -47.15, -126.72);
-INSERT INTO Site values('MSK-4', -48.87, -123.40);
+CREATE TABLE JustLatLong(lat text, long text);
+~~~
+
+~~~ {.sql}
+INSERT INTO JustLatLong values(-49.85, -128.57);
+INSERT INTO JustLatLong values(-47.15, -126.72);
+INSERT INTO JustLatLong values(-48.87, -123.40);
 ~~~
 
 We can also insert values into one table directly from another:
 
 ~~~ {.sql}
-CREATE TABLE JustLatLong(lat text, long text);
 INSERT INTO JustLatLong SELECT lat, long FROM Site;
 ~~~
 
@@ -166,24 +166,6 @@ this technique is outside the scope of this chapter.
 >
 > Write an SQL statement to replace all uses of `null` in
 > `Survey.person` with the string `'unknown'`.
-
-> ## Generating Insert Statements {.challenge}
->
-> One of our colleagues has sent us a [CSV](reference.html#comma-separated-values) file containing
-> temperature readings by Robert Olmstead, which is formatted like
-> this:
->
-> ~~~ {.output}
-> Taken,Temp
-> 619,-21.5
-> 622,-15.5
-> ~~~
->
-> Write a small Python program that reads this file in and prints out
-> the SQL `INSERT` statements needed to add these records to the
-> survey database.  Note: you will need to add an entry for Olmstead
-> to the `Person` table.  If you are testing your program repeatedly,
-> you may want to investigate SQL's `INSERT or REPLACE` command.
 
 > ## Backing Up with SQL {.challenge}
 >

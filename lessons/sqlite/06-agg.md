@@ -11,8 +11,7 @@ minutes: 30
 > *   Trace the execution of a query that performs aggregation.
 > *   Explain how missing data is handled during aggregation.
 
-We now want to calculate ranges and averages for our data.
-We know how to select all of the dates from the `Visited` table:
+We know how to select all dates from the `Visited` table:
 
 ~~~ {.sql}
 SELECT dated FROM Visited;
@@ -29,10 +28,8 @@ SELECT dated FROM Visited;
 |1932-01-14|
 |1932-03-22|
 
-but to combine them,
-we must use an [aggregation function](reference.html#aggregation-function)
-such as `min` or `max`.
-Each of these functions takes a set of records as input,
+If we want to make calculations (such as `min`, `max` or `avg`) that take into account all entries, we must use an [aggregation function](reference.html#aggregation-function).
+Each of these functions takes a set of records as input
 and produces a single record as output:
 
 ~~~ {.sql}
@@ -68,14 +65,6 @@ SELECT avg(reading) FROM Survey WHERE quant='sal';
 |7.20333333333333|
 
 ~~~ {.sql}
-SELECT count(reading) FROM Survey WHERE quant='sal';
-~~~
-
-|count(reading)|
-|--------------|
-|9             |
-
-~~~ {.sql}
 SELECT sum(reading) FROM Survey WHERE quant='sal';
 ~~~
 
@@ -83,11 +72,19 @@ SELECT sum(reading) FROM Survey WHERE quant='sal';
 |------------|
 |64.83       |
 
-We used `count(reading)` here,
+~~~ {.sql}
+SELECT count(reading) FROM Survey WHERE quant='sal';
+~~~
+
+|count(reading)|
+|--------------|
+|9             |
+
+The function `count(reading)` gives us the number of entries the column `reading`,
 but we could just as easily have counted `quant`
 or any other field in the table,
 or even used `count(*)`,
-since the function doesn't care about the values themselves,
+since this particular function doesn't care about the values themselves,
 just how many values there are.
 
 SQL lets us do several aggregations at once.
@@ -103,8 +100,7 @@ SELECT min(reading), max(reading) FROM Survey WHERE quant='sal' AND reading<=1.0
 |------------|------------|
 |0.05        |0.21        |
 
-We can also combine aggregated results with raw results,
-although the output might surprise you:
+We can also combine aggregated results with raw results but the output is not what you might hope for:
 
 ~~~ {.sql}
 SELECT person, count(*) FROM Survey WHERE quant='sal' AND reading<=1.0;
@@ -114,10 +110,9 @@ SELECT person, count(*) FROM Survey WHERE quant='sal' AND reading<=1.0;
 |------|--------|
 |lake  |7       |
 
-Why does Lake's name appear rather than Roerich's or Dyer's?
-The answer is that when it has to aggregate a field,
-but isn't told how to,
-the database manager chooses an actual value from the input set.
+Why is there only one name in the output? SQL wants to output a table with
+the data we requested and every column must have the same number of rows.
+Because the second column is an aggregate field and we didn't tell it how to aggregate the first column, the database manager chose an actual value from the input set to display.
 It might use the first one processed,
 the last one,
 or something else entirely.
@@ -139,15 +134,11 @@ they are inconsistent with the rest of SQL in a very useful way.
 If we add two values,
 and one of them is null,
 the result is null.
-By extension,
-if we use `sum` to add all the values in a set,
+However, if we use `sum` to add all the values in a set,
 and any of those values are null,
-the result should also be null.
-It's much more useful,
-though,
-for aggregation functions to ignore null values
+the aggregation function ignores null values
 and only combine those that are non-null.
-This behavior lets us write our queries as:
+This behavior lets us write queries as:
 
 ~~~ {.sql}
 SELECT min(dated) FROM Visited;
@@ -171,22 +162,8 @@ Aggregating all records at once doesn't always make sense.
 For example,
 suppose Gina suspects that there is a systematic bias in her data,
 and that some scientists' radiation readings are higher than others.
-We know that this doesn't work:
-
-~~~ {.sql}
-SELECT person, count(reading), round(avg(reading), 2)
-FROM  Survey
-WHERE quant='rad';
-~~~
-
-|person|count(reading)|round(avg(reading), 2)|
-|------|--------------|----------------------|
-|roe   |8             |6.56                  |
-
-because the database manager selects a single arbitrary scientist's name
-rather than aggregating separately for each scientist.
-Since there are only five scientists,
-she could write five queries of the form:
+If we want to look at the statistics of each scientist's measurements separately, 
+we could write five queries of the form:
 
 ~~~ {.sql}
 SELECT person, count(reading), round(avg(reading), 2)
@@ -199,12 +176,10 @@ person|count(reading)|round(avg(reading), 2)|
 ------|--------------|----------------------|
 dyer  |2             |8.81                  |
 
-but this would be tedious,
-and if she ever had a data set with fifty or five hundred scientists,
-the chances of her getting all of those queries right is small.
+but this would be tedious and likely to produce errors if the dataset has
+many scientists to look at individually.
 
-What we need to do is
-tell the database manager to aggregate the hours for each scientist separately
+We can tell the database manager to aggregate the hours for each scientist separately
 using a `GROUP BY` clause:
 
 ~~~ {.sql}
@@ -226,12 +201,12 @@ groups all the records with the same value for the specified field together
 so that aggregation can process each batch separately.
 Since all the records in each batch have the same value for `person`,
 it no longer matters that the database manager
-is picking an arbitrary one to display
+is picking an arbitrary entry to display
 alongside the aggregated `reading` values.
 
 Just as we can sort by multiple criteria at once,
 we can also group by multiple criteria.
-To get the average reading by scientist and quantity measured,
+To get the average reading by scientist and type of measurement,
 for example,
 we just add another field to the `GROUP BY` clause:
 
@@ -310,7 +285,7 @@ this query:
 >
 > The average of a set of values is the sum of the values
 > divided by the number of values.
-> Does this mean that the `avg` function returns 2.0 or 3.0
+> Would the `avg` function return 2.0 or 3.0
 > when given the values 1.0, `null`, and 5.0?
 
 > ## What Does This Query Do? {.challenge}

@@ -37,7 +37,9 @@ Queries are written in a language called [SQL](reference.html#sql),
 which stands for "Structured Query Language".
 SQL provides hundreds of different ways to analyze and recombine data.
 We will only look at a handful of queries,
-but that handful accounts for most of what scientists do.
+but those commands account for most of what scientists do.
+
+## The dataset
 
 The tables below show the database we will use in our examples:
 
@@ -102,8 +104,10 @@ Notice that three entries --- one in the `Visited` table,
 and two in the `Survey` table --- don't contain any actual
 data, but instead have a special `-null-` entry:
 we'll return to these missing values [later](05-null.html).
-For now,
-let's write an SQL query that displays scientists' names.
+
+## Selecting data
+
+Let's write an SQL query that displays scientists' names.
 We do this using the SQL command `SELECT`,
 giving it the names of the columns we want and the table we want them from.
 Our query and its output look like this:
@@ -122,6 +126,7 @@ SELECT family, personal FROM Person;
 
 The semicolon at the end of the query
 tells the database manager that the query is complete and ready to run.
+
 We have written our commands and column names in lower case,
 and the table name in Title Case,
 but we don't have to:
@@ -140,18 +145,13 @@ SeLeCt FaMiLy, PeRsOnAl FrOm PeRsOn;
 |Roerich |Valentina|
 |Danforth|Frank    |
 
-You can use SQL's case insensitivity to your advantage. For instance, some people choose to write SQL keywords (such as `SELECT` and `FROM`) in capital letters and **field** and **table** names in lower case. This can make it easier to locate parts of an SQL statement. For instance, you can scan the statement, quickly locate the prominent `FROM` keyword and know the table name follows.
-Whatever casing convention you choose,
+One convention is to write SQL keywords (such as `SELECT` and `FROM`) in capital letters and **field** and **table** names in lower case. This can make it easier to locate parts of an SQL statement. Whatever casing convention you choose,
 please be consistent:
 complex queries are hard enough to read without the extra cognitive load of random capitalization.
-One convention is to use UPPER CASE for SQL statements, to distinguish them from tables and column
-names. This is the convention that we will use for this lesson.
 
-Going back to our query,
-it's important to understand that
-the rows and columns in a database table aren't actually stored in any particular order.
-They will always be *displayed* in some order,
-but we can control that in various ways.
+It's important to understand that
+the rows and columns in a database table aren't stored in any relevant order.
+They will always be *displayed* in some order which we can control that in various ways.
 For example,
 we could swap the columns in the output by writing our query as:
 
@@ -198,20 +198,4 @@ SELECT * FROM Person;
 
 > ## Selecting Site Names {.challenge}
 >
-> Write a query that selects only site names from the `Site` table.
-
-> ## Query Style {.challenge}
->
-> Many people format queries as:
->
-> ~~~
-> SELECT personal, family FROM person;
-> ~~~
->
-> or as:
->
-> ~~~
-> select Personal, Family from PERSON;
-> ~~~
->
-> What style do you find easiest to read, and why?
+> Write a query that displays only the site names from the `Site` table.
