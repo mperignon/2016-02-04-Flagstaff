@@ -30,7 +30,7 @@
           <h2 class="subtitle">Selecting Data</h2>
           <section class="objectives panel panel-warning">
 <div class="panel-heading">
-<h2><span class="glyphicon glyphicon-certificate"></span>Learning Objectives</h2>
+<h2 id="learning-objectives"><span class="glyphicon glyphicon-certificate"></span>Learning Objectives</h2>
 </div>
 <div class="panel-body">
 <ul>
@@ -40,17 +40,18 @@
 </ul>
 </div>
 </section>
-<p>A <a href="reference.html#relational-database">relational database</a> is a way to store and manipulate information. Databases are arranged as <a href="reference.html#table">tables</a>. Each table has columns (also known as <a href="reference.html#field">fields</a>) that describe the data, and rows (also known as <a href="reference.html#record">records</a>) which contain the data.</p>
-<p>When we are using a spreadsheet, we put formulas into cells to calculate new values based on old ones. When we are using a database, we send commands (usually called <a href="reference.html#query">queries</a>) to a <a href="reference.html#database-manager">database manager</a>: a program that manipulates the database for us. The database manager does whatever lookups and calculations the query specifies, returning the results in a tabular form that we can then use as a starting point for further queries.</p>
+<p>A <a href="reference.html#relational-database">relational database</a> is a way to store and manipulate information. Databases are arranged as a collection of <a href="reference.html#table">tables</a>. Each table has columns (the <a href="reference.html#field">fields</a>) that describe the data, and rows (the <a href="reference.html#record">records</a>) which contain the data.</p>
+<p>When using a database, we send commands (usually called <a href="reference.html#query">queries</a>) to a <a href="reference.html#database-manager">database manager</a>. The database manager is a program that manipulates the database for us. It does whatever lookups and calculations the query specifies and returns the results in a tabular form that we can then use as a starting point for further queries.</p>
 <aside class="callout panel panel-info">
 <div class="panel-heading">
-<h2><span class="glyphicon glyphicon-pushpin"></span>Changing database managers</h2>
+<h2 id="changing-database-managers"><span class="glyphicon glyphicon-pushpin"></span>Changing database managers</h2>
 </div>
 <div class="panel-body">
-<p>Every database manager — Oracle, IBM DB2, PostgreSQL, MySQL, Microsoft Access, and SQLite — stores data in a different way, so a database created with one cannot be used directly by another. However, every database manager can import and export data in a variety of formats, like .csv, so it <em>is</em> possible to move information from one to another.</p>
+<p>Every database manager — Oracle, IBM DB2, PostgreSQL, MySQL, Microsoft Access, and SQLite — stores data in a different way, so a database created with one cannot be used directly by another. However, every database manager can import and export data in a variety of formats like .csv, so it <em>is</em> possible to move information from one to another.</p>
 </div>
 </aside>
-<p>Queries are written in a language called <a href="reference.html#sql">SQL</a>, which stands for “Structured Query Language”. SQL provides hundreds of different ways to analyze and recombine data. We will only look at a handful of queries, but that handful accounts for most of what scientists do.</p>
+<p>Queries are written in a language called <a href="reference.html#sql">SQL</a>, which stands for “Structured Query Language”. SQL provides hundreds of different ways to analyze and recombine data. We will only look at a handful of queries, but those commands account for most of what scientists do.</p>
+<h2 id="the-dataset">The dataset</h2>
 <p>The tables below show the database we will use in our examples:</p>
 <blockquote>
 <p><strong>Person</strong>: people who took readings.</p>
@@ -315,8 +316,10 @@
 </tbody>
 </table>
 </blockquote>
-<p>Notice that three entries — one in the <code>Visited</code> table, and two in the <code>Survey</code> table — don’t contain any actual data, but instead have a special <code>-null-</code> entry: we’ll return to these missing values <a href="05-null.html">later</a>. For now, let’s write an SQL query that displays scientists’ names. We do this using the SQL command <code>SELECT</code>, giving it the names of the columns we want and the table we want them from. Our query and its output look like this:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> family, personal <span class="kw">FROM</span> Person;</code></pre>
+<p>Notice that three entries — one in the <code>Visited</code> table, and two in the <code>Survey</code> table — don’t contain any actual data, but instead have a special <code>-null-</code> entry: we’ll return to these missing values <a href="05-null.html">later</a>.</p>
+<h2 id="selecting-data">Selecting data</h2>
+<p>Let’s write an SQL query that displays scientists’ names. We do this using the SQL command <code>SELECT</code>, giving it the names of the columns we want and the table we want them from. Our query and its output look like this:</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> family, personal <span class="kw">FROM</span> Person;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -347,8 +350,9 @@
 </tr>
 </tbody>
 </table>
-<p>The semicolon at the end of the query tells the database manager that the query is complete and ready to run. We have written our commands and column names in lower case, and the table name in Title Case, but we don’t have to: as the example below shows, SQL is <a href="reference.html#case-insensitive">case insensitive</a>.</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SeLeCt</span> FaMiLy, PeRsOnAl <span class="kw">FrOm</span> PeRsOn;</code></pre>
+<p>The semicolon at the end of the query tells the database manager that the query is complete and ready to run.</p>
+<p>We have written our commands and column names in lower case, and the table name in Title Case, but we don’t have to: as the example below shows, SQL is <a href="reference.html#case-insensitive">case insensitive</a>.</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SeLeCt</span> FaMiLy, PeRsOnAl <span class="kw">FrOm</span> PeRsOn;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -379,9 +383,9 @@
 </tr>
 </tbody>
 </table>
-<p>You can use SQL’s case insensitivity to your advantage. For instance, some people choose to write SQL keywords (such as <code>SELECT</code> and <code>FROM</code>) in capital letters and <strong>field</strong> and <strong>table</strong> names in lower case. This can make it easier to locate parts of an SQL statement. For instance, you can scan the statement, quickly locate the prominent <code>FROM</code> keyword and know the table name follows. Whatever casing convention you choose, please be consistent: complex queries are hard enough to read without the extra cognitive load of random capitalization. One convention is to use UPPER CASE for SQL statements, to distinguish them from tables and column names. This is the convention that we will use for this lesson.</p>
-<p>Going back to our query, it’s important to understand that the rows and columns in a database table aren’t actually stored in any particular order. They will always be <em>displayed</em> in some order, but we can control that in various ways. For example, we could swap the columns in the output by writing our query as:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> personal, family <span class="kw">FROM</span> Person;</code></pre>
+<p>One convention is to write SQL keywords (such as <code>SELECT</code> and <code>FROM</code>) in capital letters and <strong>field</strong> and <strong>table</strong> names in lower case. This can make it easier to locate parts of an SQL statement. Whatever casing convention you choose, please be consistent: complex queries are hard enough to read without the extra cognitive load of random capitalization.</p>
+<p>It’s important to understand that the rows and columns in a database table aren’t stored in any relevant order. They will always be <em>displayed</em> in some order which we can control that in various ways. For example, we could swap the columns in the output by writing our query as:</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> personal, family <span class="kw">FROM</span> Person;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -413,7 +417,7 @@
 </tbody>
 </table>
 <p>or even repeat columns:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> ident, ident, ident <span class="kw">FROM</span> Person;</code></pre>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> ident, ident, ident <span class="kw">FROM</span> Person;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -451,7 +455,7 @@
 </tbody>
 </table>
 <p>As a shortcut, we can select all of the columns in a table using <code>*</code>:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> * <span class="kw">FROM</span> Person;</code></pre>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> * <span class="kw">FROM</span> Person;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -490,22 +494,10 @@
 </table>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
-<h2><span class="glyphicon glyphicon-pencil"></span>Selecting Site Names</h2>
+<h2 id="selecting-site-names"><span class="glyphicon glyphicon-pencil"></span>Selecting Site Names</h2>
 </div>
 <div class="panel-body">
-<p>Write a query that selects only site names from the <code>Site</code> table.</p>
-</div>
-</section>
-<section class="challenge panel panel-success">
-<div class="panel-heading">
-<h2><span class="glyphicon glyphicon-pencil"></span>Query Style</h2>
-</div>
-<div class="panel-body">
-<p>Many people format queries as:</p>
-<pre><code>SELECT personal, family FROM person;</code></pre>
-<p>or as:</p>
-<pre><code>select Personal, Family from PERSON;</code></pre>
-<p>What style do you find easiest to read, and why?</p>
+<p>Write a query that displays only the site names from the <code>Site</code> table.</p>
 </div>
 </section>
         </div>

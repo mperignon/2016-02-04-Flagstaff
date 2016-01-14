@@ -30,7 +30,7 @@
           <h2 class="subtitle">Aggregation</h2>
           <section class="objectives panel panel-warning">
 <div class="panel-heading">
-<h2><span class="glyphicon glyphicon-certificate"></span>Learning Objectives</h2>
+<h2 id="learning-objectives"><span class="glyphicon glyphicon-certificate"></span>Learning Objectives</h2>
 </div>
 <div class="panel-body">
 <ul>
@@ -41,8 +41,8 @@
 </ul>
 </div>
 </section>
-<p>We now want to calculate ranges and averages for our data. We know how to select all of the dates from the <code>Visited</code> table:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> dated <span class="kw">FROM</span> Visited;</code></pre>
+<p>We know how to select all dates from the <code>Visited</code> table:</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> dated <span class="kw">FROM</span> Visited;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -76,8 +76,8 @@
 </tr>
 </tbody>
 </table>
-<p>but to combine them, we must use an <a href="reference.html#aggregation-function">aggregation function</a> such as <code>min</code> or <code>max</code>. Each of these functions takes a set of records as input, and produces a single record as output:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">min</span>(dated) <span class="kw">FROM</span> Visited;</code></pre>
+<p>If we want to make calculations (such as <code>min</code>, <code>max</code> or <code>avg</code>) that take into account all entries, we must use an <a href="reference.html#aggregation-function">aggregation function</a>. Each of these functions takes a set of records as input and produces a single record as output:</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">min</span>(dated) <span class="kw">FROM</span> Visited;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -91,7 +91,7 @@
 </tbody>
 </table>
 <p><img src="fig/sql-aggregation.svg" alt="SQL Aggregation" /></p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">max</span>(dated) <span class="kw">FROM</span> Visited;</code></pre>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">max</span>(dated) <span class="kw">FROM</span> Visited;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -105,7 +105,7 @@
 </tbody>
 </table>
 <p><code>min</code> and <code>max</code> are just two of the aggregation functions built into SQL. Three others are <code>avg</code>, <code>count</code>, and <code>sum</code>:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">avg</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;sal&#39;</span>;</code></pre>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">avg</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;sal&#39;</span>;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -118,20 +118,7 @@
 </tr>
 </tbody>
 </table>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">count</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;sal&#39;</span>;</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="left">count(reading)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">9</td>
-</tr>
-</tbody>
-</table>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">sum</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;sal&#39;</span>;</code></pre>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">sum</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;sal&#39;</span>;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -144,9 +131,22 @@
 </tr>
 </tbody>
 </table>
-<p>We used <code>count(reading)</code> here, but we could just as easily have counted <code>quant</code> or any other field in the table, or even used <code>count(*)</code>, since the function doesn’t care about the values themselves, just how many values there are.</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">count</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;sal&#39;</span>;</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">count(reading)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">9</td>
+</tr>
+</tbody>
+</table>
+<p>The function <code>count(reading)</code> gives us the number of entries the column <code>reading</code>, but we could just as easily have counted <code>quant</code> or any other field in the table, or even used <code>count(*)</code>, since this particular function doesn’t care about the values themselves, just how many values there are.</p>
 <p>SQL lets us do several aggregations at once. We can, for example, find the range of sensible salinity measurements:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">min</span>(reading), <span class="fu">max</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;sal&#39;</span> <span class="kw">AND</span> reading&lt;=<span class="fl">1.0</span>;</code></pre>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">min</span>(reading), <span class="fu">max</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;sal&#39;</span> <span class="kw">AND</span> reading&lt;=<span class="fl">1.0</span>;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -161,8 +161,8 @@
 </tr>
 </tbody>
 </table>
-<p>We can also combine aggregated results with raw results, although the output might surprise you:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> person, <span class="fu">count</span>(*) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;sal&#39;</span> <span class="kw">AND</span> reading&lt;=<span class="fl">1.0</span>;</code></pre>
+<p>We can also combine aggregated results with raw results but the output is not what you might hope for:</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> person, <span class="fu">count</span>(*) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;sal&#39;</span> <span class="kw">AND</span> reading&lt;=<span class="fl">1.0</span>;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -177,9 +177,9 @@
 </tr>
 </tbody>
 </table>
-<p>Why does Lake’s name appear rather than Roerich’s or Dyer’s? The answer is that when it has to aggregate a field, but isn’t told how to, the database manager chooses an actual value from the input set. It might use the first one processed, the last one, or something else entirely.</p>
+<p>Why is there only one name in the output? SQL wants to output a table with the data we requested and every column must have the same number of rows. Because the second column is an aggregate field and we didn’t tell it how to aggregate the first column, the database manager chose an actual value from the input set to display. It might use the first one processed, the last one, or something else entirely.</p>
 <p>Another important fact is that when there are no values to aggregate — for example, where there are no rows satisfying the <code>WHERE</code> clause — aggregation’s result is “don’t know” rather than zero or some other arbitrary value:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> person, <span class="fu">max</span>(reading), <span class="fu">sum</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;missing&#39;</span>;</code></pre>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> person, <span class="fu">max</span>(reading), <span class="fu">sum</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;missing&#39;</span>;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -196,8 +196,8 @@
 </tr>
 </tbody>
 </table>
-<p>One final important feature of aggregation functions is that they are inconsistent with the rest of SQL in a very useful way. If we add two values, and one of them is null, the result is null. By extension, if we use <code>sum</code> to add all the values in a set, and any of those values are null, the result should also be null. It’s much more useful, though, for aggregation functions to ignore null values and only combine those that are non-null. This behavior lets us write our queries as:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">min</span>(dated) <span class="kw">FROM</span> Visited;</code></pre>
+<p>One final important feature of aggregation functions is that they are inconsistent with the rest of SQL in a very useful way. If we add two values, and one of them is null, the result is null. However, if we use <code>sum</code> to add all the values in a set, and any of those values are null, the aggregation function ignores null values and only combine those that are non-null. This behavior lets us write queries as:</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">min</span>(dated) <span class="kw">FROM</span> Visited;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -211,7 +211,7 @@
 </tbody>
 </table>
 <p>instead of always having to filter explicitly:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">min</span>(dated) <span class="kw">FROM</span> Visited <span class="kw">WHERE</span> dated <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span>;</code></pre>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> <span class="fu">min</span>(dated) <span class="kw">FROM</span> Visited <span class="kw">WHERE</span> dated <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span>;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -224,31 +224,11 @@
 </tr>
 </tbody>
 </table>
-<p>Aggregating all records at once doesn’t always make sense. For example, suppose Gina suspects that there is a systematic bias in her data, and that some scientists’ radiation readings are higher than others. We know that this doesn’t work:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> person, <span class="fu">count</span>(reading), <span class="fu">round</span>(<span class="fu">avg</span>(reading), <span class="dv">2</span>)
-<span class="kw">FROM</span>  Survey
-<span class="kw">WHERE</span> quant=<span class="st">&#39;rad&#39;</span>;</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="left">person</th>
-<th align="left">count(reading)</th>
-<th align="left">round(avg(reading), 2)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">roe</td>
-<td align="left">8</td>
-<td align="left">6.56</td>
-</tr>
-</tbody>
-</table>
-<p>because the database manager selects a single arbitrary scientist’s name rather than aggregating separately for each scientist. Since there are only five scientists, she could write five queries of the form:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> person, <span class="fu">count</span>(reading), <span class="fu">round</span>(<span class="fu">avg</span>(reading), <span class="dv">2</span>)
+<p>Aggregating all records at once doesn’t always make sense. For example, suppose Gina suspects that there is a systematic bias in her data, and that some scientists’ radiation readings are higher than others. If we want to look at the statistics of each scientist’s measurements separately, we could write five queries of the form:</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> person, <span class="fu">count</span>(reading), <span class="fu">round</span>(<span class="fu">avg</span>(reading), <span class="dv">2</span>)
 <span class="kw">FROM</span>  Survey
 <span class="kw">WHERE</span> quant=<span class="st">&#39;rad&#39;</span>
-<span class="kw">AND</span>   person=<span class="st">&#39;dyer&#39;</span>;</code></pre>
+<span class="kw">AND</span>   person=<span class="st">&#39;dyer&#39;</span>;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -265,12 +245,12 @@
 </tr>
 </tbody>
 </table>
-<p>but this would be tedious, and if she ever had a data set with fifty or five hundred scientists, the chances of her getting all of those queries right is small.</p>
-<p>What we need to do is tell the database manager to aggregate the hours for each scientist separately using a <code>GROUP BY</code> clause:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span>   person, <span class="fu">count</span>(reading), <span class="fu">round</span>(<span class="fu">avg</span>(reading), <span class="dv">2</span>)
+<p>but this would be tedious and likely to produce errors if the dataset has many scientists to look at individually.</p>
+<p>We can tell the database manager to aggregate the hours for each scientist separately using a <code>GROUP BY</code> clause:</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span>   person, <span class="fu">count</span>(reading), <span class="fu">round</span>(<span class="fu">avg</span>(reading), <span class="dv">2</span>)
 <span class="kw">FROM</span>     Survey
 <span class="kw">WHERE</span>    quant=<span class="st">&#39;rad&#39;</span>
-<span class="kw">GROUP</span> <span class="kw">BY</span> person;</code></pre>
+<span class="kw">GROUP</span> <span class="kw">BY</span> person;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -302,11 +282,11 @@
 </tr>
 </tbody>
 </table>
-<p><code>GROUP BY</code> does exactly what its name implies: groups all the records with the same value for the specified field together so that aggregation can process each batch separately. Since all the records in each batch have the same value for <code>person</code>, it no longer matters that the database manager is picking an arbitrary one to display alongside the aggregated <code>reading</code> values.</p>
-<p>Just as we can sort by multiple criteria at once, we can also group by multiple criteria. To get the average reading by scientist and quantity measured, for example, we just add another field to the <code>GROUP BY</code> clause:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span>   person, quant, <span class="fu">count</span>(reading), <span class="fu">round</span>(<span class="fu">avg</span>(reading), <span class="dv">2</span>)
+<p><code>GROUP BY</code> does exactly what its name implies: groups all the records with the same value for the specified field together so that aggregation can process each batch separately. Since all the records in each batch have the same value for <code>person</code>, it no longer matters that the database manager is picking an arbitrary entry to display alongside the aggregated <code>reading</code> values.</p>
+<p>Just as we can sort by multiple criteria at once, we can also group by multiple criteria. To get the average reading by scientist and type of measurement, for example, we just add another field to the <code>GROUP BY</code> clause:</p>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span>   person, quant, <span class="fu">count</span>(reading), <span class="fu">round</span>(<span class="fu">avg</span>(reading), <span class="dv">2</span>)
 <span class="kw">FROM</span>     Survey
-<span class="kw">GROUP</span> <span class="kw">BY</span> person, quant;</code></pre>
+<span class="kw">GROUP</span> <span class="kw">BY</span> person, quant;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -387,11 +367,11 @@
 </table>
 <p>Note that we have added <code>quant</code> to the list of fields displayed, since the results wouldn’t make much sense otherwise.</p>
 <p>Let’s go one step further and remove all the entries where we don’t know who took the measurement:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span>   person, quant, <span class="fu">count</span>(reading), <span class="fu">round</span>(<span class="fu">avg</span>(reading), <span class="dv">2</span>)
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span>   person, quant, <span class="fu">count</span>(reading), <span class="fu">round</span>(<span class="fu">avg</span>(reading), <span class="dv">2</span>)
 <span class="kw">FROM</span>     Survey
 <span class="kw">WHERE</span>    person <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span>
 <span class="kw">GROUP</span> <span class="kw">BY</span> person, quant
-<span class="kw">ORDER</span> <span class="kw">BY</span> person, quant;</code></pre>
+<span class="kw">ORDER</span> <span class="kw">BY</span> person, quant;</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -467,7 +447,7 @@
 </ol>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
-<h2><span class="glyphicon glyphicon-pencil"></span>Counting Temperature Readings</h2>
+<h2 id="counting-temperature-readings"><span class="glyphicon glyphicon-pencil"></span>Counting Temperature Readings</h2>
 </div>
 <div class="panel-body">
 <p>How many temperature readings did Frank Pabodie record, and what was their average value?</p>
@@ -475,29 +455,29 @@
 </section>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
-<h2><span class="glyphicon glyphicon-pencil"></span>Averaging with NULL</h2>
+<h2 id="averaging-with-null"><span class="glyphicon glyphicon-pencil"></span>Averaging with NULL</h2>
 </div>
 <div class="panel-body">
-<p>The average of a set of values is the sum of the values divided by the number of values. Does this mean that the <code>avg</code> function returns 2.0 or 3.0 when given the values 1.0, <code>null</code>, and 5.0?</p>
+<p>The average of a set of values is the sum of the values divided by the number of values. Would the <code>avg</code> function return 2.0 or 3.0 when given the values 1.0, <code>null</code>, and 5.0?</p>
 </div>
 </section>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
-<h2><span class="glyphicon glyphicon-pencil"></span>What Does This Query Do?</h2>
+<h2 id="what-does-this-query-do"><span class="glyphicon glyphicon-pencil"></span>What Does This Query Do?</h2>
 </div>
 <div class="panel-body">
 <p>We want to calculate the difference between each individual radiation reading and the average of all the radiation readings. We write the query:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> reading - <span class="fu">avg</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;rad&#39;</span>;</code></pre>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">SELECT</span> reading - <span class="fu">avg</span>(reading) <span class="kw">FROM</span> Survey <span class="kw">WHERE</span> quant=<span class="st">&#39;rad&#39;</span>;</code></pre></div>
 <p>What does this actually produce, and why?</p>
 </div>
 </section>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
-<h2><span class="glyphicon glyphicon-pencil"></span>Ordering When Concatenating</h2>
+<h2 id="ordering-when-concatenating"><span class="glyphicon glyphicon-pencil"></span>Ordering When Concatenating</h2>
 </div>
 <div class="panel-body">
 <p>The function <code>group_concat(field, separator)</code> concatenates all the values in a field using the specified separator character (or ‘,’ if the separator isn’t specified). Use this to produce a one-line list of scientists’ names, such as:</p>
-<pre class="sourceCode sql"><code class="sourceCode sql">William Dyer, Frank Pabodie, Anderson Lake, Valentina Roerich, Frank Danforth</code></pre>
+<div class="sourceCode"><pre class="sourceCode sql"><code class="sourceCode sql">William Dyer, Frank Pabodie, Anderson Lake, Valentina Roerich, Frank Danforth</code></pre></div>
 <p>Can you find a way to order the list by surname?</p>
 </div>
 </section>
