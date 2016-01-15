@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Programming with Python
-subtitle: Analyzing Patient Data
+subtitle: Analyzing Temperature Data
 minutes: 30
 ---
 > ## Learning Objectives {.objectives}
@@ -20,7 +20,7 @@ Similarly,
 while a lot of powerful tools are built into languages like Python,
 even more live in the [libraries](reference.html#library) they are used to build.
 
-In order to load our inflammation data,
+In order to load our temperature data,
 we need to [import](reference.html#import) a library called NumPy.
 In general you should use this library if you want to do fancy things with numbers,
 especially if you have matrices or arrays.
@@ -36,16 +36,13 @@ Once you've loaded the library,
 we can ask the library to read our data file for us:
 
 ~~~ {.python}
-numpy.loadtxt(fname='inflammation-01.csv', delimiter=',')
+numpy.loadtxt(fname='data/temperature.csv', delimiter=',')
 ~~~
 ~~~ {.output}
-array([[ 0.,  0.,  1., ...,  3.,  0.,  0.],
-       [ 0.,  1.,  2., ...,  1.,  0.,  1.],
-       [ 0.,  1.,  1., ...,  2.,  1.,  1.],
-       ...,
-       [ 0.,  1.,  1., ...,  1.,  1.,  1.],
-       [ 0.,  0.,  0., ...,  0.,  2.,  0.],
-       [ 0.,  0.,  1., ...,  1.,  1.,  0.]])
+array([[ 264.,  264.,  264., ...,  263.,  263.,  264.],
+       [ 263.,  264.,  264., ...,  262.,  262.,  263.],
+       [ 301.,  302.,  302., ...,  301.,  301.,  301.],
+       [ 292.,  293.,  293., ...,  291.,  292.,  292.]])
 ~~~
 
 The expression `numpy.loadtxt(...)` is a [function call](reference.html#function-call)
@@ -175,7 +172,7 @@ Just as we can assign a single value to a variable, we can also assign an array 
 to a variable using the same syntax.  Let's re-run `numpy.loadtxt` and save its result:
 
 ~~~ {.python}
-data = numpy.loadtxt(fname='inflammation-01.csv', delimiter=',')
+data = numpy.loadtxt(fname='data/temperature.csv',delimiter=',')
 ~~~
 
 This statement doesn't produce any output because assignment doesn't display anything.
@@ -186,13 +183,10 @@ we can print the variable's value:
 print(data)
 ~~~
 ~~~ {.output}
-[[ 0.  0.  1. ...,  3.  0.  0.]
- [ 0.  1.  2. ...,  1.  0.  1.]
- [ 0.  1.  1. ...,  2.  1.  1.]
- ...,
- [ 0.  1.  1. ...,  1.  1.  1.]
- [ 0.  0.  0. ...,  0.  2.  0.]
- [ 0.  0.  1. ...,  1.  1.  0.]]
+[[ 264.  264.  264. ...,  263.  263.  264.]
+ [ 263.  264.  264. ...,  262.  262.  263.]
+ [ 301.  302.  302. ...,  301.  301.  301.]
+ [ 292.  293.  293. ...,  291.  292.  292.]]
 ~~~
 
 Now that our data is in memory,
@@ -214,11 +208,11 @@ We can see what its [shape](reference.html#shape) is like this:
 print(data.shape)
 ~~~
 ~~~ {.output}
-(60, 40)
+(4, 365)
 ~~~
 
-This tells us that `data` has 60 rows and 40 columns. When we created the
-variable `data` to store our arthritis data, we didn't just create the array, we also
+This tells us that `data` has 4 rows and 365 columns. When we created the
+variable `data` to store our temperature data, we didn't just create the array, we also
 created information about the array, called [members](reference.html#member) or
 attributes. This extra information describes `data` in
 the same way an adjective describes a noun.
@@ -235,17 +229,19 @@ just as we do in math:
 print('first value in data:', data[0, 0])
 ~~~
 ~~~ {.output}
-first value in data: 0.0
+first value in data: 264.0
+
 ~~~
 
 ~~~ {.python}
-print('middle value in data:', data[30, 20])
+print('middle value in data:', data[2, 180])
 ~~~
 ~~~ {.output}
-middle value in data: 13.0
+middle value in data: 696.0
+
 ~~~
 
-The expression `data[30, 20]` may not surprise you,
+The expression `data[2, 180]` may not surprise you,
 but `data[0, 0]` might.
 Programming languages like Fortran and MATLAB start counting at 1,
 because that's what human beings have done for thousands of years.
@@ -269,24 +265,23 @@ the index is how many steps we have to take from the start to get the item we wa
 > The indices are (row, column) instead of (column, row) for the same reason,
 > which can be confusing when plotting data.
 
-An index like `[30, 20]` selects a single element of an array,
+An index like `[2, 180]` selects a single element of an array,
 but we can select whole sections as well.
 For example,
 we can select the first ten days (columns) of values
-for the first four patients (rows) like this:
+for the first two stations (rows) like this:
 
 ~~~ {.python}
-print(data[0:4, 0:10])
+print(data[0:2, 0:10])
 ~~~
 ~~~ {.output}
-[[ 0.  0.  1.  3.  1.  2.  4.  7.  8.  3.]
- [ 0.  1.  2.  1.  2.  1.  3.  2.  2.  6.]
- [ 0.  1.  1.  3.  3.  2.  6.  2.  5.  9.]
- [ 0.  0.  2.  0.  4.  2.  2.  1.  6.  7.]]
+[[ 264.  264.  264.  265.  265.  266.  266.  266.  267.  267.]
+ [ 263.  264.  264.  265.  265.  266.  266.  267.  267.  268.]]
+
 ~~~
 
-The [slice](reference.html#slice) `0:4` means,
-"Start at index 0 and go up to, but not including, index 4."
+The [slice](reference.html#slice) `0:2` means,
+"Start at index 0 and go up to, but not including, index 2."
 Again,
 the up-to-but-not-including takes a bit of getting used to,
 but the rule is that the difference between the upper and lower bounds is the number of values in the slice.
@@ -294,14 +289,11 @@ but the rule is that the difference between the upper and lower bounds is the nu
 We don't have to start slices at 0:
 
 ~~~ {.python}
-print(data[5:10, 0:10])
+print(data[2:4, 0:10])
 ~~~
 ~~~ {.output}
-[[ 0.  0.  1.  2.  2.  4.  2.  1.  6.  4.]
- [ 0.  0.  2.  2.  4.  2.  2.  5.  5.  8.]
- [ 0.  0.  1.  2.  3.  1.  2.  3.  5.  3.]
- [ 0.  0.  0.  3.  1.  5.  6.  5.  5.  8.]
- [ 0.  1.  1.  2.  1.  3.  5.  3.  5.  8.]]
+[[ 301.  302.  302.  302.  303.  303.  304.  304.  305.  306.]
+ [ 292.  293.  293.  294.  294.  295.  295.  296.  296.  297.]]
 ~~~
 
 We also don't have to include the upper and lower bound on the slice.
@@ -314,15 +306,14 @@ and if we don't include either
 the slice includes everything:
 
 ~~~ {.python}
-small = data[:3, 36:]
+small = data[:2,360:]
 print('small is:')
 print(small)
 ~~~
 ~~~ {.output}
 small is:
-[[ 2.  3.  0.  0.]
- [ 1.  1.  0.  1.]
- [ 2.  2.  1.  1.]]
+[[ 263.  263.  263.  263.  264.]
+ [ 261.  261.  262.  262.  263.]]
 ~~~
 
 Arrays also know how to perform common mathematical operations on their values.
@@ -341,19 +332,18 @@ whose elements have the value of two times the value of the corresponding elemen
 
 ~~~ {.python}
 print('original:')
-print(data[:3, 36:])
+print(data[:2,360:])
 print('doubledata:')
-print(doubledata[:3, 36:])
+print(doubledata[:2,360:])
 ~~~
 ~~~ {.output}
 original:
-[[ 2.  3.  0.  0.]
- [ 1.  1.  0.  1.]
- [ 2.  2.  1.  1.]]
+[[ 263.  263.  263.  263.  264.]
+ [ 261.  261.  262.  262.  263.]]
 doubledata:
-[[ 4.  6.  0.  0.]
- [ 2.  2.  0.  2.]
- [ 4.  4.  2.  2.]]
+[[ 526.  526.  526.  526.  528.]
+ [ 522.  522.  524.  524.  526.]]
+
 ~~~
 
 If,
@@ -371,18 +361,17 @@ and so on for all other elements of the arrays.
 
 ~~~ {.python}
 print('tripledata:')
-print(tripledata[:3, 36:])
+print(tripledata[:2,360:])
 ~~~
 ~~~ {.output}
 tripledata:
-[[ 6.  9.  0.  0.]
- [ 3.  3.  0.  3.]
- [ 6.  6.  3.  3.]]
+[[ 789.  789.  789.  789.  792.]
+ [ 783.  783.  786.  786.  789.]]
 ~~~
 
 Often, we want to do more than add, subtract, multiply, and divide values of data.
 Arrays also know how to do more complex operations on their values.
-If we want to find the average inflammation for all patients on all days,
+If we want to find the average temperature on all days across all stations,
 for example,
 we can just ask the array for its mean value
 
@@ -390,7 +379,7 @@ we can just ask the array for its mean value
 print(data.mean())
 ~~~
 ~~~ {.output}
-6.14875
+457.837671233
 ~~~
 
 `mean` is a [method](reference.html#method) of the array,
@@ -408,51 +397,45 @@ because it is an action.
 NumPy arrays have lots of useful methods:
 
 ~~~ {.python}
-print('maximum inflammation:', data.max())
-print('minimum inflammation:', data.min())
+print('maximum temperature:', data.max())
+print('minimum temperature:', data.min())
 print('standard deviation:', data.std())
 ~~~
 ~~~ {.output}
-maximum inflammation: 20.0
-minimum inflammation: 0.0
-standard deviation: 4.61383319712
+maximum temperature: 714.0
+minimum temperature: 261.0
+standard deviation: 133.797538033
 ~~~
 
 When analyzing data,
 though,
 we often want to look at partial statistics,
-such as the maximum value per patient
+such as the maximum value per station
 or the average value per day.
 One way to do this is to create a new temporary array of the data we want,
 then ask it to do the calculation:
 
 ~~~ {.python}
-patient_0 = data[0, :] # 0 on the first axis, everything on the second
-print('maximum inflammation for patient 0:', patient_0.max())
+station_0 = data[0, :] # 0 on the first axis, everything on the second
+print('maximum temperature for station 0:', station_0.max())
 ~~~
 ~~~ {.output}
-maximum inflammation for patient 0: 18.0
+maximum temperature for station 0: 641.0
 ~~~
 
 We don't actually need to store the row in a variable of its own.
 Instead, we can combine the selection and the method call:
 
 ~~~ {.python}
-print('maximum inflammation for patient 2:', data[2, :].max())
+print('maximum temperature for station 2:', data[2, :].max())
 ~~~
 ~~~ {.output}
-maximum inflammation for patient 2: 19.0
+maximum temperature for station 2: 714.0
 ~~~
 
-What if we need the maximum inflammation for *all* patients (as in the
-next diagram on the left), or the average for each day (as in the
-diagram on the right)? As the diagram below shows, we want to perform the
-operation across an axis:
-
-![Operations Across Axes](fig/python-operations-across-axes.svg)
-
-To support this,
-most array methods allow us to specify the axis we want to work on.
+If we need the maximum temperature for every stations, or the average for each day, we can perform the
+operation across an axis. To support this,
+most array methods allow us to specify the axis we want to work on. 
 If we ask for the average across axis 0 (rows in our 2D example),
 we get:
 
@@ -460,14 +443,49 @@ we get:
 print(data.mean(axis=0))
 ~~~
 ~~~ {.output}
-[  0.           0.45         1.11666667   1.75         2.43333333   3.15
-   3.8          3.88333333   5.23333333   5.51666667   5.95         5.9
-   8.35         7.73333333   8.36666667   9.5          9.58333333
-  10.63333333  11.56666667  12.35        13.25        11.96666667
-  11.03333333  10.16666667  10.           8.66666667   9.15         7.25
-   7.33333333   6.58333333   6.06666667   5.95         5.11666667   3.6
-   3.3          3.56666667   2.48333333   1.5          1.13333333
-   0.56666667]
+
+[ 280.    280.75  280.75  281.5   281.75  282.5   282.75  283.25  283.75
+  284.5   284.75  285.5   286.    286.75  287.    287.5   288.25  288.75
+  289.25  290.    290.5   290.75  291.75  292.    292.75  293.5   294.
+  295.    295.75  296.25  297.    298.25  298.75  299.75  300.75  301.75
+  302.5   303.75  305.    306.    307.5   309.    310.5   311.75  313.25
+  314.75  316.5   318.    319.75  321.25  323.    325.    326.5   328.25
+  330.25  332.    334.    335.75  337.5   339.5   341.25  343.25  345.25
+  347.25  348.75  350.75  352.75  354.5   356.25  358.    359.75  361.5
+  363.25  365.    366.5   368.25  370.25  371.5   373.25  375.    376.5
+  378.25  380.    382.    383.5   385.25  387.25  389.    390.75  392.75
+  394.5   396.5   398.5   400.5   402.75  405.    407.    409.    412.
+  414.    416.5   419.    421.75  424.25  426.75  429.5   432.    435.
+  437.5   440.5   443.25  446.    449.    452.    454.75  457.75  460.5
+  463.5   466.    469.25  472.    475.    477.75  480.75  483.25  486.
+  489.    491.25  494.    496.5   499.25  501.75  504.25  506.75  509.5
+  511.5   514.    516.5   519.    521.5   523.75  526.25  528.5   531.
+  533.25  535.75  538.25  541.    543.25  545.75  548.5   551.    553.75
+  556.5   559.25  562.    564.75  567.75  570.75  573.5   576.5   579.5
+  582.5   585.5   588.75  591.75  595.    598.    601.5   604.5   607.5
+  610.5   613.5   616.75  619.75  622.5   625.25  628.25  630.75  633.5
+  636.    638.5   640.5   642.75  644.75  647.    649.    650.5   652.
+  653.5   654.75  656.    657.    658.    658.75  659.25  659.75  660.25
+  660.5   660.5   660.5   660.5   660.25  660.    659.5   659.25  658.25
+  658.    657.25  656.25  655.75  654.5   653.75  652.75  651.75  650.75
+  649.5   648.5   647.5   646.5   645.5   644.25  643.    642.    640.75
+  639.75  638.25  637.25  635.75  634.75  633.25  632.    630.75  629.5
+  628.    626.75  625.25  623.5   621.75  620.25  618.5   616.75  614.75
+  613.    610.5   608.5   606.5   603.75  601.75  599.    596.5   593.5
+  591.    588.25  585.    582.    578.75  575.75  572.    568.75  565.
+  561.5   557.75  554.25  550.5   546.75  543.    539.25  535.    531.75
+  527.5   523.5   520.    515.75  512.25  508.25  504.5   500.75  496.75
+  493.25  489.75  486.    482.75  478.75  475.5   472.    468.75  465.5
+  462.    459.    455.75  452.5   449.5   446.25  443.25  440.    437.
+  434.    431.5   428.5   425.5   422.5   419.25  416.25  413.25  410.25
+  407.25  403.75  400.75  397.75  394.25  391.25  387.75  384.5   381.25
+  377.75  374.5   371.    367.5   364.25  360.5   357.25  353.75  350.25
+  347.    343.5   340.    337.    333.25  330.    326.75  323.5   320.5
+  317.75  314.75  311.75  309.25  306.75  304.    301.75  299.25  297.5
+  295.25  293.25  291.25  289.75  288.5   287.    285.75  284.5   283.25
+  282.5   281.5   281.    280.5   280.25  279.75  279.5   279.5   279.
+  279.    279.25  279.25  279.5   280.  ]
+
 ~~~
 
 As a quick check,
@@ -477,26 +495,21 @@ we can ask this array what its shape is:
 print(data.mean(axis=0).shape)
 ~~~
 ~~~ {.output}
-(40,)
+(365,)
 ~~~
 
-The expression `(40,)` tells us we have an N&times;1 vector,
-so this is the average inflammation per day for all patients.
+The expression `(365,)` tells us we have an N&times;1 vector,
+so this is the average temperature per day for all stations.
 If we average across axis 1 (columns in our 2D example), we get:
 
 ~~~ {.python}
 print(data.mean(axis=1))
 ~~~
 ~~~ {.output}
-[ 5.45   5.425  6.1    5.9    5.55   6.225  5.975  6.65   6.625  6.525
-  6.775  5.8    6.225  5.75   5.225  6.3    6.55   5.7    5.85   6.55
-  5.775  5.825  6.175  6.1    5.8    6.425  6.05   6.025  6.175  6.55
-  6.175  6.35   6.725  6.125  7.075  5.725  5.925  6.15   6.075  5.75
-  5.975  5.725  6.3    5.9    6.75   5.925  7.225  6.15   5.95   6.275  5.7
-  6.1    6.825  5.975  6.725  5.7    6.25   6.4    7.05   5.9  ]
+[ 438.43013699  430.06849315  499.87671233  462.97534247]
 ~~~
 
-which is the average inflammation per patient across all days.
+which is the average temperature per station across all days.
 
 The mathematician Richard Hamming once said,
 "The purpose of computing is insight, not numbers,"
@@ -515,11 +528,7 @@ image  = matplotlib.pyplot.imshow(data)
 matplotlib.pyplot.show(image)
 ~~~
 
-![Heatmap of the Data](fig/01-numpy_71_0.png)
-
-Blue regions in this heat map are low values, while red shows high values.
-As we can see,
-inflammation rises and falls over a 40-day period.
+![Heatmap of the Data](fig/01-numpy-heatmap-small.png)
 
 > ## Some IPython magic {.callout}
 >
@@ -536,46 +545,32 @@ inflammation rises and falls over a 40-day period.
 > a function that is only valid within the notebook environment.
 > Note that you only have to execute this function once per notebook.
 
-Let's take a look at the average inflammation over time:
+It's very hard to see what the image shows when it's that small. Let's change the aspect ratio:
 
 ~~~ {.python}
-ave_inflammation = data.mean(axis=0)
-ave_plot = matplotlib.pyplot.plot(ave_inflammation)
+image  = matplotlib.pyplot.imshow(data)
+matplotlib.pyplot.axes().set_aspect('auto')
+matplotlib.pyplot.show(image)
+~~~
+
+![Heatmap of the Data with different aspect ratio](fig/01-numpy-heatmap-large.png)
+
+Blue regions in this heat map are low values, while red shows high values.
+As we can see,
+temperature rises and falls over the year.
+
+Let's take a look at the average temperature between all the stations over time:
+
+~~~ {.python}
+ave_temp = data.mean(axis=0)
+ave_plot = matplotlib.pyplot.plot(ave_temp)
 matplotlib.pyplot.show(ave_plot)
 ~~~
 
-![Average Inflammation Over Time](fig/01-numpy_73_0.png)
+![Average Temperature Over Time](fig/01-numpy-avg_temp.png)
 
-Here,
-we have put the average per day across all patients in the variable `ave_inflammation`,
-then asked `matplotlib.pyplot` to create and display a line graph of those values.
-The result is roughly a linear rise and fall,
-which is suspicious:
-based on other studies,
-we expect a sharper rise and slower fall.
-Let's have a look at two other statistics:
-
-~~~ {.python}
-max_plot = matplotlib.pyplot.plot(data.max(axis=0))
-matplotlib.pyplot.show(max_plot)
-~~~
-
-![Maximum Value Along The First Axis](fig/01-numpy_75_1.png)
-
-~~~ {.python}
-min_plot = matplotlib.pyplot.plot(data.min(axis=0))
-matplotlib.pyplot.show(min_plot)
-~~~
-
-![Minimum Value Along The First Axis](fig/01-numpy_75_3.png)
-
-The maximum value rises and falls perfectly smoothly,
-while the minimum seems to be a step function.
-Neither result seems particularly likely,
-so either there's a mistake in our calculations
-or something is wrong with our data.
-
-You can group similar plots in a single figure using subplots.
+It's interesting to examine how the temperature trends vary between stations throughout the year. 
+We can plot data from each of the stations separately in a single figure using subplots.
 This script below uses a number of new commands. The function `matplotlib.pyplot.figure()`
 creates a space into which we will place all of our plots. The parameter `figsize`
 tells Python how big to make this space. Each subplot is placed into the figure using
@@ -583,47 +578,46 @@ the `subplot` command. The `subplot` command takes 3 parameters. The first denot
 how many total rows of subplots there are, the second parameter refers to the
 total number of subplot columns, and the final parameters denotes which subplot
 your variable is referencing. Each subplot is stored in a different variable (axes1, axes2,
-axes3). Once a subplot is created, the axes are can be titled using the
+axes3, axes4). Once a subplot is created, the axes are can be titled using the
 `set_xlabel()` command (or `set_ylabel()`).
-Here are our three plots side by side:
+Here are our four plots stacked:
 
 ~~~ {.python}
-import numpy
-import matplotlib.pyplot
+import numpy as np
+import matplotlib.pyplot as plt
 
-data = numpy.loadtxt(fname='inflammation-01.csv', delimiter=',')
+data = np.loadtxt(fname='data/temperature.csv', delimiter=',')
 
-fig = matplotlib.pyplot.figure(figsize=(10.0, 3.0))
+fig = plt.figure(figsize=(5.0, 9.0))
 
-axes1 = fig.add_subplot(1, 3, 1)
-axes2 = fig.add_subplot(1, 3, 2)
-axes3 = fig.add_subplot(1, 3, 3)
+axes1 = fig.add_subplot(4, 1, 1)
+axes2 = fig.add_subplot(4, 1, 2)
+axes3 = fig.add_subplot(4, 1, 3)
+axes4 = fig.add_subplot(4, 1, 4)
 
-axes1.set_ylabel('average')
-axes1.plot(data.mean(axis=0))
+axes1.set_ylabel('station 0')
+axes1.plot(data[0,:])
 
-axes2.set_ylabel('max')
-axes2.plot(data.max(axis=0))
+axes2.set_ylabel('station 1')
+axes2.plot(data[1,:])
 
-axes3.set_ylabel('min')
-axes3.plot(data.min(axis=0))
+axes3.set_ylabel('station 2')
+axes3.plot(data[2,:])
 
-fig.tight_layout()
+axes4.set_ylabel('station 3')
+axes4.plot(data[3,:])
 
-matplotlib.pyplot.show(fig)
+plt.show(fig)
 ~~~
 
-![The Previous Plots as Subplots](fig/01-numpy_80_0.png)
+![Temperature at each Station as Subplots](fig/01-numpy-subplots.png)
 
+We first import the necessary libraries into our script. In this case, we gave them shortcut or nickname ("np" and "plt") to avoid typing so much. 
 The [call](reference.html#function-call) to `loadtxt` reads our data,
 and the rest of the program tells the plotting library
 how large we want the figure to be,
-that we're creating three sub-plots,
-what to draw for each one,
-and that we want a tight layout.
-(Perversely,
-if we leave out that call to `fig.tight_layout()`,
-the graphs will actually be squeezed together more closely.)
+that we're creating four sub-plots, and
+what to draw for each one.
 
 > ## Scientists dislike typing {.callout}
 >
@@ -688,18 +682,10 @@ the graphs will actually be squeezed together more closely.)
 > what does `data[3:3, 4:4]` produce?
 > What about `data[3:3, :]`?
 
-> ## Check your understanding: plot scaling {.challenge}
->
-> Why do all of our plots stop just short of the upper end of our graph?
-
-> ## Check your understanding: drawing straight lines {.challenge}
->
-> Why are the vertical lines in our plot of the minimum inflammation per day not perfectly vertical?
-
 > ## Make your own plot {.challenge}
 >
-> Create a plot showing the standard deviation (`numpy.std`) of the inflammation data for each day across all patients.
+> Create a plot showing the standard deviation (`numpy.std`) of the temperature data for each day across all stations.
 
 > ## Moving plots around {.challenge}
 >
-> Modify the program to display the three plots on top of one another instead of side by side.
+> Modify the program to display the four plots as a 2x2 grid instead of as a stack.

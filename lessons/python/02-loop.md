@@ -11,15 +11,10 @@ minutes: 30
 > *   Trace changes to a loop variable as the loop runs.
 > *   Trace changes to other variables as they are updated by a for loop.
 
-In the last lesson,
-we wrote some code that plots some values of interest from our first inflammation dataset,
-and reveals some suspicious features in it, such as from `inflammation-01.csv`
+Deep down, most people want to learn how to program so they can automate things.
+To do that, we'll have to teach the computer how to repeat actions.
 
-![Analysis of inflammation-01.csv](fig/03-loop_2_0.png)\
-
-We have a dozen data sets right now, though, and more on the way.
-We want to create plots for all of our data sets with a single statement.
-To do that, we'll have to teach the computer how to repeat things.
+![Cover of "Automate the Boring Stuff with Python"](fig/02-loop-automate-book.png)\
 
 An example task that we might want to repeat is printing each character in a
 word on a line of its own. One way to do this would be to use a series of `print` statements:
