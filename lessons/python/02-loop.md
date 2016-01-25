@@ -21,10 +21,10 @@ word on a line of its own. One way to do this would be to use a series of `print
 
 ~~~ {.python}
 word = 'lead'
-print(word[0])
-print(word[1])
-print(word[2])
-print(word[3])
+print word[0]
+print word[1]
+print word[2]
+print word[3]
 
 ~~~
 ~~~ {.output}
@@ -48,10 +48,10 @@ This is a bad approach for two reasons:
 
 ~~~ {.python}
 word = 'tin'
-print(word[0])
-print(word[1])
-print(word[2])
-print(word[3])
+print word[0]
+print word[1]
+print word[2]
+print word[3]
 
 ~~~
 ~~~ {.output}
@@ -63,9 +63,9 @@ n
 ---------------------------------------------------------------------------
 IndexError                                Traceback (most recent call last)
 <ipython-input-3-7974b6cdaf14> in <module>()
-      3 print(word[1])
-      4 print(word[2])
-----> 5 print(word[3])
+      3 print word[1]
+      4 print word[2]
+----> 5 print word[3]
 
 IndexError: string index out of range
 ~~~
@@ -76,7 +76,7 @@ Here's a better approach:
 ~~~ {.python}
 word = 'lead'
 for char in word:
-    print(char)
+    print char
 
 ~~~
 
@@ -93,7 +93,7 @@ more robust as well:
 ~~~ {.python}
 word = 'oxygen'
 for char in word:
-    print(char)
+    print char
 ~~~
 
 ~~~ {.output}
@@ -125,7 +125,7 @@ Here's another loop that repeatedly updates a variable:
 length = 0
 for vowel in 'aeiou':
     length = length + 1
-print('There are', length, 'vowels')
+print 'There are', length, 'vowels'
 ~~~
 
 ~~~ {.output}
@@ -150,6 +150,26 @@ since there is nothing left in `'aeiou'` for Python to process,
 the loop finishes
 and the `print` statement on line 4 tells us our final answer.
 
+
+> ## Built-in functions {.callout}
+> 
+> Finding the length of a string is such a common operation
+> that Python actually has a built-in function to do it called `len`:
+> 
+> ~~~ {.python}
+> print len('aeiou')
+> ~~~
+> 
+> ~~~ {.output}
+> 5
+> ~~~
+> 
+> `len` is much faster than any function we could write ourselves,
+> and much easier to read than a two-line loop;
+> it will also give us the length of many other things that we haven't met yet,
+> so we should always use it when we can.
+
+
 Note that a loop variable is just a variable that's being used to record progress in a loop.
 It still exists after the loop is over,
 and we can re-use variables previously defined as loop variables as well:
@@ -157,8 +177,8 @@ and we can re-use variables previously defined as loop variables as well:
 ~~~ {.python}
 letter = 'z'
 for letter in 'abc':
-    print(letter)
-print('after the loop, letter is', letter)
+    print letter
+print 'after the loop, letter is', letter
 ~~~
 
 ~~~ {.output}
@@ -167,22 +187,6 @@ b
 c
 after the loop, letter is c
 ~~~
-
-Note also that finding the length of a string is such a common operation
-that Python actually has a built-in function to do it called `len`:
-
-~~~ {.python}
-print(len('aeiou'))
-~~~
-
-~~~ {.output}
-5
-~~~
-
-`len` is much faster than any function we could write ourselves,
-and much easier to read than a two-line loop;
-it will also give us the length of many other things that we haven't met yet,
-so we should always use it when we can.
 
 
 > ## From 1 to N {.challenge}
@@ -209,7 +213,7 @@ so we should always use it when we can.
 > Exponentiation is built into Python:
 >
 > ~~~ {.python}
-> print(5**3)
+> print 5**3
 > 125
 > ~~~
 >
