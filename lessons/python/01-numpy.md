@@ -14,10 +14,7 @@ minutes: 30
 > *   Perform operations on arrays of data.
 > *   Display simple graphs.
 
-Words are useful,
-but what's more useful are the sentences and stories we build with them.
-Similarly,
-while a lot of powerful tools are built into languages like Python,
+While a lot of powerful tools are built into languages like Python,
 even more live in the [libraries](reference.html#library) they are used to build.
 
 In order to load our temperature data,
@@ -684,7 +681,7 @@ what to draw for each one.
 
 > ## Make your own plot {.challenge}
 >
-> Create a plot showing the standard deviation (`numpy.std`) of the temperature data for each day across all stations.
+> Create a plot showing the maximum (`numpy.max`), minimum (`numpy.min`), and standard deviation (`numpy.std`) of the temperature data for each day across all stations. Make subplots and use the correct `axis=` argument in the function calls.
 
 > ## Moving plots around {.challenge}
 >
