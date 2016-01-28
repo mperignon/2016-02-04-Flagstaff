@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: Programming with Python</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">Programming with Python</h1></a>
+          <h2 class="subtitle">Creating Functions</h2>
+          <section class="objectives panel panel-warning">
+<div class="panel-heading">
+<h2 id="learning-objectives"><span class="glyphicon glyphicon-certificate"></span>Learning Objectives</h2>
+</div>
+<div class="panel-body">
+<ul>
+<li>Explain what a for loop does.</li>
+<li>Correctly write for loops to repeat simple calculations.</li>
+<li>Trace changes to a loop variable as the loop runs.</li>
+<li>Trace changes to other variables as they are updated by a for loop.</li>
+</ul>
+</div>
+</section>
+<p>We wrote a script for importing streamgage data through the USGS web services, cleaning up the formatting, plotting the discharge over time, and saving the figure into a file. We would like to turn this script into a tool that we can reuse for different stations and date ranges without having to rewrite the code. Let’s look at the code again (I deleted the rows that were commented out):</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> pandas <span class="im">as</span> pd
+<span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt
+<span class="op">%</span>matplotlib inline
+
+new_column_names <span class="op">=</span> [<span class="st">&#39;Agency&#39;</span>, <span class="st">&#39;Station&#39;</span>, <span class="st">&#39;OldDateTime&#39;</span>, <span class="st">&#39;Timezone&#39;</span>, <span class="st">&#39;Discharge_cfs&#39;</span>, <span class="st">&#39;Discharge_stat&#39;</span>, <span class="st">&#39;Stage_ft&#39;</span>, <span class="st">&#39;Stage_stat&#39;</span>]
+
+url <span class="op">=</span> <span class="st">&#39;http://waterservices.usgs.gov/nwis/iv/?format=rdb&amp;sites=09380000&amp;startDT=2016-01-01&amp;endDT=2016-01-10&amp;parameterCd=00060,00065&#39;</span>
+data <span class="op">=</span> pd.read_csv(url, header<span class="op">=</span><span class="dv">1</span>, sep<span class="op">=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>, comment<span class="op">=</span><span class="st">&#39;#&#39;</span>, names <span class="op">=</span> new_column_names)
+
+data[<span class="st">&#39;DateTime&#39;</span>] <span class="op">=</span> pd.to_datetime(data[<span class="st">&#39;OldDateTime&#39;</span>])
+
+new_station_name <span class="op">=</span> <span class="st">&quot;0&quot;</span> <span class="op">+</span> <span class="bu">str</span>(data[<span class="st">&#39;Station&#39;</span>].unique()[<span class="dv">0</span>])
+data[<span class="st">&#39;Station&#39;</span>] <span class="op">=</span> new_station_name
+
+data.plot(x<span class="op">=</span><span class="st">&#39;DateTime&#39;</span>, y<span class="op">=</span><span class="st">&#39;Discharge_cfs&#39;</span>, title<span class="op">=</span><span class="st">&#39;Station &#39;</span> <span class="op">+</span> new_station_name)
+plt.xlabel(<span class="st">&#39;Time&#39;</span>)
+plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
+plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> new_station_name <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)
+plt.show()</code></pre></div>
+<pre class="output"><code>![png](fig/output_1_0.png)</code></pre>
+<p>The station number and date range we are interested in are part of the URL that we use to communicate with the web services. The specific file we receive when the <code>read_csv</code> command runs doesn’t exist – when our script requests the data, the server reads the URL to see what we want, pulls data from a database, packages it, and passes it on to us. The API (the protocol that governs the communication between machines) establishes the “formula” for writing the URL. As long as we follow that formula (and request data that exists), the server will provide it for us.</p>
+<p>Let’s decompose the URL into its parts and combine them back into a single string:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">url_root <span class="op">=</span> <span class="st">&#39;http://waterservices.usgs.gov/nwis/iv/?&#39;</span> <span class="co"># root of URL</span>
+
+url_1 <span class="op">=</span> <span class="st">&#39;format=&#39;</span> <span class="op">+</span> <span class="st">&#39;rdb&#39;</span> <span class="co"># file format</span>
+
+url_2 <span class="op">=</span> <span class="st">&#39;sites=&#39;</span> <span class="op">+</span> <span class="st">&#39;09380000&#39;</span> <span class="co"># station number</span>
+
+url_3 <span class="op">=</span> <span class="st">&#39;startDT=&#39;</span> <span class="op">+</span> <span class="st">&#39;2016-01-01&#39;</span> <span class="co"># start date</span>
+
+url_4 <span class="op">=</span> <span class="st">&#39;endDT=&#39;</span> <span class="op">+</span> <span class="st">&#39;2016-01-10&#39;</span> <span class="co"># end date</span>
+
+url_5 <span class="op">=</span> <span class="st">&#39;parameterCd=&#39;</span> <span class="op">+</span> <span class="st">&#39;00060,00065&#39;</span> <span class="co"># data fields</span>
+
+
+url <span class="op">=</span> url_root <span class="op">+</span> url_1 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_2 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_3 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_4 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_5
+<span class="bu">print</span> url</code></pre></div>
+<pre class="output"><code>  http://waterservices.usgs.gov/nwis/iv/?format=rdb&amp;sites=09380000&amp;startDT=2016-01-01&amp;endDT=2016-01-10&amp;parameterCd=00060,00065</code></pre>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="python-dictionaries-to-urls"><span class="glyphicon glyphicon-pushpin"></span>Python dictionaries to URLs</h2>
+</div>
+<div class="panel-body">
+<p>Another useful data type built into Python is the <strong>dictionary</strong>. While lists and other sequences are indexed by a range of numbers, dictionaries are indexed by <strong>keys</strong>. A dictionary is an unordered collection of key:value pairs. Keys must be unique (within any one dictionary) and can be strings or numbers. Values in a dictionary can be of any type, and different pairs in one dictionary can have different types of values.</p>
+<p>We can store the parameters of our URL in a dictionary. Here’s one of several ways to add entries to a dictionary:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">url_dict <span class="op">=</span> {} <span class="co"># create an empty dictionary</span>
+
+url_dict[<span class="st">&#39;format&#39;</span>] <span class="op">=</span> <span class="st">&#39;rdb&#39;</span>
+url_dict[<span class="st">&#39;sites&#39;</span>] <span class="op">=</span> <span class="st">&#39;09380000&#39;</span>
+url_dict[<span class="st">&#39;startDT&#39;</span>] <span class="op">=</span> <span class="st">&#39;2016-01-01&#39;</span>
+url_dict[<span class="st">&#39;endDT&#39;</span>] <span class="op">=</span> <span class="st">&#39;2016-01-10&#39;</span>
+url_dict[<span class="st">&#39;parameterCd&#39;</span>] <span class="op">=</span> [<span class="st">&#39;00060&#39;</span>,<span class="st">&#39;00065&#39;</span>]
+
+<span class="bu">print</span> url_dict</code></pre></div>
+<pre class="output"><code>    {&#39;parameterCd&#39;: [&#39;00060&#39;, &#39;00065&#39;], &#39;endDT&#39;: &#39;2016-01-10&#39;, &#39;startDT&#39;: &#39;2016-01-01&#39;, &#39;sites&#39;: &#39;09380000&#39;, &#39;format&#39;: &#39;rdb&#39;}</code></pre>
+<p>Just like there is the Numpy library for matrices and Pandas for tabular data, there is a Python library that provides a simple interface for accessing resources through URLs (take a look at the most popular package repository: https://pypi.python.org/). Many of the most popular and useful libraries for scientific computing come pre-installed with the Anaconda distribution.</p>
+<p>We can use the <code>urllib</code> package to convert the dictionary into a URL following the standard format used by web services. The order of the parameters doesn’t matter to the server!</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> urllib
+
+<span class="co"># need to set the parameter doseq to 1 to handle the list in url_dict[&#39;parameterCd&#39;]</span>
+url_parameters <span class="op">=</span> urllib.urlencode(url_dict, doseq<span class="op">=</span><span class="dv">1</span>)
+
+<span class="bu">print</span> url_root <span class="op">+</span> url_parameters</code></pre></div>
+<pre class="output"><code>   http://waterservices.usgs.gov/nwis/iv/?parameterCd=00060&amp;parameterCd=00065&amp;endDT=2016-01-10&amp;startDT=2016-01-01&amp;sites=09380000&amp;format=rdb</code></pre>
+</div>
+</aside>
+<p>This is not the most elegant way to write the URL but it accomplishes the job! To clean things up a bit, we can replace the values we want to be able to change with variables:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">this_station <span class="op">=</span> <span class="st">&#39;09380000&#39;</span>
+startDate <span class="op">=</span> <span class="st">&#39;2016-01-01&#39;</span>
+endDate <span class="op">=</span> <span class="st">&#39;2016-01-10&#39;</span>
+
+
+url_root <span class="op">=</span> <span class="st">&#39;http://waterservices.usgs.gov/nwis/iv/?&#39;</span>
+url_1 <span class="op">=</span> <span class="st">&#39;format=&#39;</span> <span class="op">+</span> <span class="st">&#39;rdb&#39;</span>
+url_2 <span class="op">=</span> <span class="st">&#39;sites=&#39;</span> <span class="op">+</span> this_station
+url_3 <span class="op">=</span> <span class="st">&#39;startDT=&#39;</span> <span class="op">+</span> startDate
+url_4 <span class="op">=</span> <span class="st">&#39;endDT=&#39;</span> <span class="op">+</span> endDate
+url_5 <span class="op">=</span> <span class="st">&#39;parameterCd=&#39;</span> <span class="op">+</span> <span class="st">&#39;00060,00065&#39;</span>
+
+url <span class="op">=</span> url_root <span class="op">+</span> url_1 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_2 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_3 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_4 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_5
+<span class="bu">print</span> url</code></pre></div>
+<pre class="output"><code>  http://waterservices.usgs.gov/nwis/iv/?format=rdb&amp;sites=09380000&amp;startDT=2016-01-01&amp;endDT=2016-01-10&amp;parameterCd=00060,00065</code></pre>
+<p>We can now combine it with the rest of our code:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> pandas <span class="im">as</span> pd
+<span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt
+<span class="op">%</span>matplotlib inline
+
+<span class="co">########## change these values ###########</span>
+this_station <span class="op">=</span> <span class="st">&#39;09380000&#39;</span>
+startDate <span class="op">=</span> <span class="st">&#39;2016-01-01&#39;</span>
+endDate <span class="op">=</span> <span class="st">&#39;2016-01-10&#39;</span>
+<span class="co">##########################################</span>
+
+<span class="co"># create the URL</span>
+url_root <span class="op">=</span> <span class="st">&#39;http://waterservices.usgs.gov/nwis/iv/?&#39;</span>
+url_1 <span class="op">=</span> <span class="st">&#39;format=&#39;</span> <span class="op">+</span> <span class="st">&#39;rdb&#39;</span>
+url_2 <span class="op">=</span> <span class="st">&#39;sites=&#39;</span> <span class="op">+</span> this_station
+url_3 <span class="op">=</span> <span class="st">&#39;startDT=&#39;</span> <span class="op">+</span> startDate
+url_4 <span class="op">=</span> <span class="st">&#39;endDT=&#39;</span> <span class="op">+</span> endDate
+url_5 <span class="op">=</span> <span class="st">&#39;parameterCd=&#39;</span> <span class="op">+</span> <span class="st">&#39;00060,00065&#39;</span>
+
+url <span class="op">=</span> url_root <span class="op">+</span> url_1 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_2 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_3 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_4 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_5
+
+<span class="co"># import the data</span>
+new_column_names <span class="op">=</span> [<span class="st">&#39;Agency&#39;</span>, <span class="st">&#39;Station&#39;</span>, <span class="st">&#39;OldDateTime&#39;</span>, <span class="st">&#39;Timezone&#39;</span>, <span class="st">&#39;Discharge_cfs&#39;</span>, <span class="st">&#39;Discharge_stat&#39;</span>, <span class="st">&#39;Stage_ft&#39;</span>, <span class="st">&#39;Stage_stat&#39;</span>]
+
+data <span class="op">=</span> pd.read_csv(url, header<span class="op">=</span><span class="dv">1</span>, sep<span class="op">=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>, comment<span class="op">=</span><span class="st">&#39;#&#39;</span>, names <span class="op">=</span> new_column_names)
+
+<span class="co"># fix formatting</span>
+data[<span class="st">&#39;DateTime&#39;</span>] <span class="op">=</span> pd.to_datetime(data[<span class="st">&#39;OldDateTime&#39;</span>])
+new_station_name <span class="op">=</span> <span class="st">&quot;0&quot;</span> <span class="op">+</span> <span class="bu">str</span>(data[<span class="st">&#39;Station&#39;</span>].unique()[<span class="dv">0</span>])
+data[<span class="st">&#39;Station&#39;</span>] <span class="op">=</span> new_station_name
+
+<span class="co"># plot and save figure</span>
+data.plot(x<span class="op">=</span><span class="st">&#39;DateTime&#39;</span>, y<span class="op">=</span><span class="st">&#39;Discharge_cfs&#39;</span>, title<span class="op">=</span><span class="st">&#39;Station &#39;</span> <span class="op">+</span> new_station_name)
+plt.xlabel(<span class="st">&#39;Time&#39;</span>)
+plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
+plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> new_station_name <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)
+plt.show()</code></pre></div>
+<pre class="output"><code>![png](fig/output_11_0.png)</code></pre>
+<h2 id="creating-functions">Creating Functions</h2>
+<p>If we wanted to import data from a different station or for a different date range, we would manually change the first three variables and run the code again. It would be a lot less work than having to download the file and plot it by hand, but it could still be very tedious! At this point, our code is also getting long and complicated; what if we had thousands of datasets but didn’t want to generate a figure for every single one? Commenting out the figure-drawing code is a nuisance. Also, what if we want to use that code again, on a different dataset or at a different point in our program? Cutting and pasting it is going to make our code get very long and very repetative, very quickly. We’d like a way to package our code so that it is easier to reuse, and Python provides for this by letting us define things called <strong>function</strong> - a shorthand way of re-executing longer pieces of code.</p>
+<p>Let’s by defining a function <code>fahr_to_kelvin</code> that converts temperatures from Fahrenheit to Kelvin:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> fahr_to_kelvin(temp):
+    <span class="cf">return</span> ((temp <span class="op">-</span> <span class="dv">32</span>) <span class="op">*</span> (<span class="dv">5</span><span class="op">/</span><span class="dv">9</span>)) <span class="op">+</span> <span class="fl">273.15</span></code></pre></div>
+<p>The function definition opens with the word def, which is followed by the name of the function and a parenthesized list of parameter names. The body of the function — the statements that are executed when it runs — is indented below the definition line, typically by four spaces.</p>
+<p>When we call the function, the values we pass to it are assigned to those variables so that we can use them inside the function. Inside the function, we use a return statement to send a result back to whoever asked for it.</p>
+<p>Notice that nothing happened when we ran the cell that contains the function. Python became aware of the function and what it is supposed to do, but until we call it, there is nothing for the function to do. Calling our own function is no different from calling any other function (see the resemblance with the help file for <code>read_csv</code>?):</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">print</span> <span class="st">&#39;freezing point of water:&#39;</span>, fahr_to_kelvin(<span class="dv">32</span>)
+<span class="bu">print</span> <span class="st">&#39;boiling point of water:&#39;</span>, fahr_to_kelvin(<span class="dv">212</span>)</code></pre></div>
+<pre class="output"><code>freezing point of water: 273.15
+boiling point of water: 273.15</code></pre>
+<p>The boiling point of water in Kelvin should be 373.15 K, not 273.15 K!</p>
+<p>Functions make code easier to debug by isolating each possible source of error. In this case, the first term of the equation, <code>((temp - 32) * (5/9))</code>, is returning 0 (instead of 100) when the temperature is 212 F. If we look at each part of that expression, we find:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="dv">5</span><span class="op">/</span><span class="dv">9</span></code></pre></div>
+<pre class="output"><code>0</code></pre>
+<p>5 divided by 9 should be 0.5556, but when we ask Python 2.7 to divide to integers, it returns an integer! If we want to want to keep the fractional part of the division, we need to convert one or the other number to floating point:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">print</span> <span class="st">&#39;two integers:&#39;</span>, <span class="dv">5</span><span class="op">/</span><span class="dv">9</span>
+<span class="bu">print</span> <span class="st">&#39;5.0/9:&#39;</span>, <span class="fl">5.0</span><span class="op">/</span><span class="dv">9</span>
+<span class="bu">print</span> <span class="st">&#39;5/9.0:&#39;</span>, <span class="dv">5</span><span class="op">/</span><span class="fl">9.0</span></code></pre></div>
+<pre class="output"><code>two integers: 0
+5.0/9: 0.555555555556
+5/9.0: 0.555555555556</code></pre>
+<p>You can also turn an integer into a float by <strong>casting</strong>:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">float</span>(<span class="dv">5</span>)<span class="op">/</span><span class="dv">9</span></code></pre></div>
+<pre class="output"><code>0.5555555555555556</code></pre>
+<h2 id="casting-challenges" class="challenge">Casting challenges</h2>
+<p>What happens when you type <code>float(5/9)</code>?</p>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="integer-division-in-python-3"><span class="glyphicon glyphicon-pushpin"></span>Integer division in Python 3</h2>
+</div>
+<div class="panel-body">
+<p>The problem of integer division does not exist in Python 3, where division always returns a floating point number. We use Python 2.7 because it is much more commonly used in our community, but always keep integer division in mind as it will be a common source of bugs in your code. And as annoying as it may seem, there are memory benefits to integer division!</p>
+</div>
+</aside>
+<p>Let’s rewrite our function with the fixed bug:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> fahr_to_kelvin(temp):
+    <span class="cf">return</span> ((temp <span class="op">-</span> <span class="dv">32</span>) <span class="op">*</span> (<span class="dv">5</span>.<span class="op">/</span><span class="dv">9</span>)) <span class="op">+</span> <span class="fl">273.15</span>
+
+<span class="bu">print</span> <span class="st">&#39;freezing point of water:&#39;</span>, fahr_to_kelvin(<span class="dv">32</span>)
+<span class="bu">print</span> <span class="st">&#39;boiling point of water:&#39;</span>, fahr_to_kelvin(<span class="dv">212</span>)</code></pre></div>
+<pre class="output"><code>freezing point of water: 273.15
+boiling point of water: 373.15</code></pre>
+<h2 id="composing-functions">Composing Functions</h2>
+<p>Now that we’ve seen how to turn Fahrenheit into Kelvin, it’s easy to turn Kelvin into Celsius:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> kelvin_to_celsius(temp_k):
+    <span class="cf">return</span> temp_k <span class="op">-</span> <span class="fl">273.15</span>
+
+<span class="bu">print</span> <span class="st">&#39;absolute zero in Celsius:&#39;</span>, kelvin_to_celsius(<span class="fl">0.0</span>) </code></pre></div>
+<pre class="output"><code>absolute zero in Celsius: -273.15</code></pre>
+<p>What about converting Fahrenheit to Celsius? We could write out the formula, but we don’t need to. Instead, we can compose the two functions we have already created:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> fahr_to_celsius(temp_f):
+    temp_k <span class="op">=</span> fahr_to_kelvin(temp_f)
+    temp_c <span class="op">=</span> kelvin_to_celsius(temp_k)
+    <span class="cf">return</span> temp_c
+
+<span class="bu">print</span> <span class="st">&#39;freezing point of water in Celsius:&#39;</span>, fahr_to_celsius(<span class="fl">32.0</span>) </code></pre></div>
+<pre class="output"><code>freezing point of water in Celsius: 0.0</code></pre>
+<p>This is our first taste of how larger programs are built: we define basic operations, then combine them in ever-large chunks to get the effect we want. Real-life functions will usually be larger than the ones shown here — typically half a dozen to a few dozen lines — but they shouldn’t ever be much longer than that, or the next person who reads it won’t be able to understand what’s going on.</p>
+<h2 id="tidying-up">Tidying up</h2>
+<p>Now that we know how to wrap bits of code in functions, we can make our streamgage data plotting code easier to read and easier to reuse. First, let’s make a <code>import_streamgage_data</code> function to pull the data file from the server and fix the formatting:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> import_streamgage_data(url):
+    
+    new_column_names <span class="op">=</span> [<span class="st">&#39;Agency&#39;</span>, <span class="st">&#39;Station&#39;</span>, <span class="st">&#39;OldDateTime&#39;</span>, <span class="st">&#39;Timezone&#39;</span>, <span class="st">&#39;Discharge_cfs&#39;</span>, <span class="st">&#39;Discharge_stat&#39;</span>, <span class="st">&#39;Stage_ft&#39;</span>, <span class="st">&#39;Stage_stat&#39;</span>]
+
+    data <span class="op">=</span> pd.read_csv(url, header<span class="op">=</span><span class="dv">1</span>, sep<span class="op">=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>, comment<span class="op">=</span><span class="st">&#39;#&#39;</span>, names <span class="op">=</span> new_column_names)
+
+    <span class="co"># fix formatting</span>
+    data[<span class="st">&#39;DateTime&#39;</span>] <span class="op">=</span> pd.to_datetime(data[<span class="st">&#39;OldDateTime&#39;</span>])
+    new_station_name <span class="op">=</span> <span class="st">&quot;0&quot;</span> <span class="op">+</span> <span class="bu">str</span>(data[<span class="st">&#39;Station&#39;</span>].unique()[<span class="dv">0</span>])
+    data[<span class="st">&#39;Station&#39;</span>] <span class="op">=</span> new_station_name
+    
+    <span class="cf">return</span> data</code></pre></div>
+<p>We can make another function <code>plot_discharge</code> to compose to plot and save the figures:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> plot_discharge(data):
+    
+    data.plot(x<span class="op">=</span><span class="st">&#39;DateTime&#39;</span>, y<span class="op">=</span><span class="st">&#39;Discharge_cfs&#39;</span>, title<span class="op">=</span><span class="st">&#39;Station &#39;</span> <span class="op">+</span> new_station_name)
+    plt.xlabel(<span class="st">&#39;Time&#39;</span>)
+    plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
+    plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> new_station_name <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)
+    plt.show()</code></pre></div>
+<p>The function <code>plot_discharge</code> produces output that is visible to us but has no return statement because it doesn’t need to give anything back when it is called.</p>
+<p>We can also wrap up the script for composing URLs into a function called <code>generate_URL</code>:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> generate_URL(station, startDT, endDT):
+
+    url_root <span class="op">=</span> <span class="st">&#39;http://waterservices.usgs.gov/nwis/iv/?&#39;</span>
+    url_1 <span class="op">=</span> <span class="st">&#39;format=&#39;</span> <span class="op">+</span> <span class="st">&#39;rdb&#39;</span>
+    url_2 <span class="op">=</span> <span class="st">&#39;sites=&#39;</span> <span class="op">+</span> station
+    url_3 <span class="op">=</span> <span class="st">&#39;startDT=&#39;</span> <span class="op">+</span> startDT
+    url_4 <span class="op">=</span> <span class="st">&#39;endDT=&#39;</span> <span class="op">+</span> endDT
+    url_5 <span class="op">=</span> <span class="st">&#39;parameterCd=&#39;</span> <span class="op">+</span> <span class="st">&#39;00060,00065&#39;</span>
+
+    url <span class="op">=</span> url_root <span class="op">+</span> url_1 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_2 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_3 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_4 <span class="op">+</span> <span class="st">&#39;&amp;&#39;</span> <span class="op">+</span> url_5
+    
+    <span class="cf">return</span> url</code></pre></div>
+<p>Now that these three functions exist, we can rewrite our previous code in a much simpler script:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="co">########## change these values ###########</span>
+this_station <span class="op">=</span> <span class="st">&#39;09380000&#39;</span>
+startDate <span class="op">=</span> <span class="st">&#39;2016-01-01&#39;</span>
+endDate <span class="op">=</span> <span class="st">&#39;2016-01-10&#39;</span>
+<span class="co">##########################################</span>
+
+url <span class="op">=</span> generate_URL(this_station, startDate, endDate)
+data <span class="op">=</span> import_streamgage_data(url)
+plot_discharge(data)</code></pre></div>
+<pre class="output"><code>![png](fig/output_38_0.png)</code></pre>
+<h2 id="testing-and-documenting">Testing and Documenting</h2>
+<p>It doesn’t long to forget what code we wrote in the past was supposed to do. We should always write some documentation for our functions to remind ourselves later what they are for and how they are supposed to be used.</p>
+<p>The usual way to put documentation in software is to add comments:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="co"># plot_discharge(data): take a DataFrame containing streamgage data, plot the discharge and save a figure to file.</span>
+<span class="kw">def</span> plot_discharge(data):
+    
+    data.plot(x<span class="op">=</span><span class="st">&#39;DateTime&#39;</span>, y<span class="op">=</span><span class="st">&#39;Discharge_cfs&#39;</span>, title<span class="op">=</span><span class="st">&#39;Station &#39;</span> <span class="op">+</span> new_station_name)
+    plt.xlabel(<span class="st">&#39;Time&#39;</span>)
+    plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
+    plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> new_station_name <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)
+    plt.show()</code></pre></div>
+<p>There’s a better way, though. If the first thing in a function is a string that isn’t assigned to a variable, that string is attached to the function as its documentation. A string like this is called a <strong>docstring</strong> (one set of quotes for single line strings, three sets for multi-line strings!):</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> plot_discharge(data):
+    <span class="co">&#39;&#39;&#39;</span>
+<span class="co">    Take a DataFrame containing streamgage data,</span>
+<span class="co">    plot the discharge and save a figure to file.</span>
+<span class="co">    &#39;&#39;&#39;</span>
+    
+    data.plot(x<span class="op">=</span><span class="st">&#39;DateTime&#39;</span>, y<span class="op">=</span><span class="st">&#39;Discharge_cfs&#39;</span>, title<span class="op">=</span><span class="st">&#39;Station &#39;</span> <span class="op">+</span> new_station_name)
+    plt.xlabel(<span class="st">&#39;Time&#39;</span>)
+    plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
+    plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> new_station_name <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)
+    plt.show()</code></pre></div>
+<p>This is better because we can now ask Python’s built-in help system to show us the documentation for the function:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">help</span>(plot_discharge)</code></pre></div>
+<pre class="output"><code>    Help on function plot_discharge in module __main__:
+    
+    plot_discharge(data)
+        Take a DataFrame containing streamgage data,
+        plot the discharge and save a figure to file.</code></pre>
+<h2 id="defining-defaults">Defining Defaults:</h2>
+<p>When we use the <code>read_csv</code> method, we pass parameters in two ways: directly, as in <code>pd.read_csv(url)</code>, and by name, as we did for the parameter <code>sep</code> in <code>pd.read_csv(url, sep = '\t')</code>.</p>
+<p>If we look at the documentation for <code>read_csv</code>, all parameters but the first (<code>filepath_or_buffer</code>) have a default value in the function definition (<code>sep=','</code>). The function will not run if the parameters without default values are not provided, but all parameters with defaults are optional. This is handy: if we usually want a function to work one way but occasionally need it to do something else, we can allow people to pass a parameter when they need to but provide a default to make the normal case easier.</p>
+<p>The example below shows how Python matches values to parameters:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> display(a<span class="op">=</span><span class="dv">1</span>, b<span class="op">=</span><span class="dv">2</span>, c<span class="op">=</span><span class="dv">3</span>):
+    <span class="bu">print</span> <span class="st">&#39;a:&#39;</span>, a, <span class="st">&#39;b:&#39;</span>, b, <span class="st">&#39;c:&#39;</span>, c 
+
+<span class="bu">print</span> <span class="st">&#39;no parameters:&#39;</span> 
+display()
+
+<span class="bu">print</span> <span class="st">&#39;one parameter:&#39;</span>
+display(<span class="dv">55</span>)
+
+<span class="bu">print</span> <span class="st">&#39;two parameters:&#39;</span>
+display(<span class="dv">55</span>, <span class="dv">66</span>)</code></pre></div>
+<pre class="output"><code>no parameters:
+a: 1 b: 2 c: 3
+one parameter:
+a: 55 b: 2 c: 3
+two parameters:
+a: 55 b: 66 c: 3</code></pre>
+<p>As this example shows, parameters are matched up from left to right, and any that haven’t been given a value explicitly get their default value. We can override this behavior by naming the value as we pass it in:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">print</span>(<span class="st">&#39;only setting the value of c&#39;</span>)
+display(c<span class="op">=</span><span class="dv">77</span>)</code></pre></div>
+<pre class="output"><code>only setting the value of c
+a: 1 b: 2 c: 77</code></pre>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="combining-strings"><span class="glyphicon glyphicon-pencil"></span>Combining strings</h2>
+</div>
+<div class="panel-body">
+<p>“Adding” two strings produces their concatenation: <code>'a' + 'b'</code> is <code>'ab'</code>. Write a function called <code>fence</code> that takes two parameters called <code>original</code> and <code>wrapper</code> and returns a new string that has the wrapper character at the beginning and end of the original. A call to your function should look like this:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">print</span> fence(<span class="st">&#39;name&#39;</span>, <span class="st">&#39;*&#39;</span>)</code></pre></div>
+<pre class="output"><code>*name*</code></pre>
+</div>
+</section>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="selecting-characters-from-strings"><span class="glyphicon glyphicon-pencil"></span>Selecting characters from strings</h2>
+</div>
+<div class="panel-body">
+<p>If the variable <code>s</code> refers to a string, then <code>s[0]</code> is the string’s first character and <code>s[-1]</code> is its last. Write a function called <code>outer</code> that returns a string made up of just the first and last characters of its input. A call to your function should look like this:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">print</span> outer(<span class="st">&#39;helium&#39;</span>)</code></pre></div>
+<pre class="output"><code>hm</code></pre>
+</div>
+</section>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="rescaling-an-array"><span class="glyphicon glyphicon-pencil"></span>Rescaling an array</h2>
+</div>
+<div class="panel-body">
+<p>Write a function <code>rescale</code> that takes an array as input and returns a corresponding array of values scaled to lie in the range 0.0 to 1.0. (Hint: If <span class="math inline"><em>L</em></span> and <span class="math inline"><em>H</em></span> are the lowest and highest values in the original array, then the replacement for a value <span class="math inline"><em>v</em></span> should be <span class="math inline">(<em>v</em> − <em>L</em>)/(<em>H</em> − <em>L</em>)</span>.)</p>
+</div>
+</section>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="testing-and-documenting-your-function"><span class="glyphicon glyphicon-pencil"></span>Testing and documenting your function</h2>
+</div>
+<div class="panel-body">
+<p>Run the commands <code>help(numpy.arange)</code> and <code>help(numpy.linspace)</code> to see how to use these functions to generate regularly-spaced values, then use those values to test your <code>rescale</code> function. Once you’ve successfully tested your function, add a docstring that explains what it does.</p>
+</div>
+</section>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="defining-defaults-1"><span class="glyphicon glyphicon-pencil"></span>Defining defaults</h2>
+</div>
+<div class="panel-body">
+<p>Rewrite the <code>rescale</code> function so that it scales data to lie between 0.0 and 1.0 by default, but will allow the caller to specify lower and upper bounds if they want. Compare your implementation to your neighbor’s: do the two functions always behave the same way?</p>
+</div>
+</section>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="variables-inside-and-outside-functions"><span class="glyphicon glyphicon-pencil"></span>Variables inside and outside functions</h2>
+</div>
+<div class="panel-body">
+<p>What does the following piece of code display when run - and why?</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">f <span class="op">=</span> <span class="dv">0</span>
+k <span class="op">=</span> <span class="dv">0</span>
+
+<span class="kw">def</span> f2k(f):
+  k <span class="op">=</span> ((f<span class="dv">-32</span>)<span class="op">*</span>(<span class="fl">5.0</span><span class="op">/</span><span class="fl">9.0</span>)) <span class="op">+</span> <span class="fl">273.15</span>
+  <span class="cf">return</span> k
+
+f2k(<span class="dv">8</span>)
+f2k(<span class="dv">41</span>)
+f2k(<span class="dv">32</span>)
+
+<span class="bu">print</span> k</code></pre></div>
+</div>
+</section>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/python-novice-inflammation">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>

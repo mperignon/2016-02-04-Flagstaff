@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: Programming with Python</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">Programming with Python</h1></a>
+          <h2 class="subtitle">Using Pandas with tabular data</h2>
+          <section class="objectives panel panel-warning">
+<div class="panel-heading">
+<h2 id="learning-objectives"><span class="glyphicon glyphicon-certificate"></span>Learning Objectives</h2>
+</div>
+<div class="panel-body">
+<ul>
+<li>Explain what a for loop does.</li>
+<li>Correctly write for loops to repeat simple calculations.</li>
+<li>Trace changes to a loop variable as the loop runs.</li>
+<li>Trace changes to other variables as they are updated by a for loop.</li>
+</ul>
+</div>
+</section>
+<p>Since by now you have all written some Python code that works, we are going to jump directly into doing some science tasks with data pulled directly from real sources, instead of using a dataset we cleaned for you.</p>
+<p>Some of the stuff we are going to do will be fairly advanced but I think that seeing how the language can automate your workflow - and especially how it can handle the tasks that are annoying or difficult - will make it more likely that you’ll come back to it. We are throwing a lot at you, so put a red sticky up if you need hands-on help and interrupt if you have a question, and we’ll adjust as we go.</p>
+<p>We are interested in the comparing the discharge over a specific time period at different points along the Colorado River. The traditional way to do this is through the USGS website:</p>
+<p>http://waterwatch.usgs.gov/?m=real&amp;r=az</p>
+<p>and then precisely selecting the station you want and going through the whole process by hand. At the end, you have end up with some csv files that look like this:</p>
+<p>http://waterdata.usgs.gov/az/nwis/uv?cb_00060=on&amp;cb_00065=on&amp;format=rdb&amp;site_no=09380000&amp;period=&amp;begin_date=2016-01-01&amp;end_date=2016-01-10</p>
+<p>The header is annoying because it doesn’t always have the same number of lines. Depending on the specific options we selected, the table has a different number of columns. Automating the analysis of these files is rough, and it requires quite a bit of handholding in Excel. If we were to do this frequently or for many stations, the chances of introducing an error are high.</p>
+<p>Instead of doing this by hand, we are going to automate the entire process of data import and processing using Python. We will write a script that will take two dates and a list of stations and will automatically create plots of the gage height and discharge for each of those stations.</p>
+<p>Earlier today we used a Python library called numpy to handle arrays of data. <code>numpy arrays</code> are matrices and are great for doing calculations on data, but they can only contain floats or integers. Tabular data are best handled by spreadsheets where entries such as dates and times are in some useful format.</p>
+<p>One of the best options for working with tabular data in Python is the Python Data Analysis Library (a.k.a. Pandas). The Pandas library provides data structures, produces high quality plots with matplotlib (the plotting library we used earlier) and integrates nicely with other libraries that can use numpy arrays.</p>
+<p>Let’s start by importing streamgage data from a file that has already been partially cleaned up. Open the file in a text editor and see: we removed the header and the column format line (“5d 15s…”), and saved it as a comma-delimited file instead of tab delimited.</p>
+<p>We will first import the Pandas library and give it the shortcut <code>pd</code> and use the Pandas function <code>read_csv</code> to import the file. This will pull the contents of the file into a DataFrame. Let’s assign it to a variable named <code>data</code> (so original!) and print the first 5 lines:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> pandas <span class="im">as</span> pd
+
+data <span class="op">=</span> pd.read_csv(<span class="st">&#39;data/streamgage.csv&#39;</span>)
+data.head()</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;agency_cd&lt;/th&gt;
+      &lt;th&gt;site_no&lt;/th&gt;
+      &lt;th&gt;datetime&lt;/th&gt;
+      &lt;th&gt;tz_cd&lt;/th&gt;
+      &lt;th&gt;01_00060&lt;/th&gt;
+      &lt;th&gt;01_00060_cd&lt;/th&gt;
+      &lt;th&gt;02_00065&lt;/th&gt;
+      &lt;th&gt;02_00065_cd&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:15&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:30&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:45&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 1:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3470&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.76&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="whats-a-dataframe"><span class="glyphicon glyphicon-pushpin"></span>What’s a DataFrame?</h2>
+</div>
+<div class="panel-body">
+<p>A DataFrame is a 2-dimensional data structure that can store data of different types (including characters, integers, floating point values, factors and more) in columns. It is similar to a spreadsheet or an SQL table or the data.frame in R.</p>
+<p>Check the data type of <code>data</code> using the <code>type</code> method. The <code>type</code> method and <code>__class__</code> attribute tell us what type of object the variable points to. We will not discuss the full meaning of this terminology, related to object-oriented programming, in the workshop.</p>
+</div>
+</aside>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">print</span> <span class="bu">type</span>(data)
+<span class="bu">print</span> data.__class__</code></pre></div>
+<pre class="output"><code>&lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;
+&lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;</code></pre>
+<p>Each column in a DataFrame also has a type. We can use <code>data.dtypes</code> to view the data type for each column. <code>int64</code> represents numeric integer values - <code>int64</code> cells can not store decimals. <code>object</code> represents strings (letters and numbers). <code>float64</code> represents numbers with decimals.</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data.dtypes</code></pre></div>
+<pre class="output"><code>agency_cd       object
+site_no          int64
+datetime        object
+tz_cd           object
+01_00060         int64
+01_00060_cd     object
+02_00065       float64
+02_00065_cd     object
+dtype: object</code></pre>
+<p>We need to give the DataFrame column names that are easier to read. Let’s create a list with the column names we want:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">new_column_names <span class="op">=</span> [<span class="st">&#39;Agency&#39;</span>, <span class="st">&#39;Station&#39;</span>, <span class="st">&#39;OldDateTime&#39;</span>, <span class="st">&#39;Timezone&#39;</span>, <span class="st">&#39;Discharge_cfs&#39;</span>, <span class="st">&#39;Discharge_stat&#39;</span>, <span class="st">&#39;Stage_ft&#39;</span>, <span class="st">&#39;Stage_stat&#39;</span>]</code></pre></div>
+<p>We can see the column names of a DataFrame using the method <code>columns</code>, and we can use that same method to assign it the new column names:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">print</span> <span class="st">&#39;Old column names:&#39;</span>, data.columns
+
+data.columns <span class="op">=</span> new_column_names
+
+<span class="bu">print</span> <span class="st">&#39;New column names:&#39;</span>, data.columns</code></pre></div>
+<pre class="output"><code>Old column names: Index([u&#39;agency_cd&#39;, u&#39;site_no&#39;, u&#39;datetime&#39;, u&#39;tz_cd&#39;, u&#39;01_00060&#39;,
+       u&#39;01_00060_cd&#39;, u&#39;02_00065&#39;, u&#39;02_00065_cd&#39;],
+      dtype=&#39;object&#39;)
+New column names: Index([u&#39;Agency&#39;, u&#39;Station&#39;, u&#39;OldDateTime&#39;, u&#39;Timezone&#39;, u&#39;Discharge_cfs&#39;,
+       u&#39;Discharge_stat&#39;, u&#39;Stage_ft&#39;, u&#39;Stage_stat&#39;],
+      dtype=&#39;object&#39;)</code></pre>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data.head()</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;Agency&lt;/th&gt;
+      &lt;th&gt;Station&lt;/th&gt;
+      &lt;th&gt;OldDateTime&lt;/th&gt;
+      &lt;th&gt;Timezone&lt;/th&gt;
+      &lt;th&gt;Discharge_cfs&lt;/th&gt;
+      &lt;th&gt;Discharge_stat&lt;/th&gt;
+      &lt;th&gt;Stage_ft&lt;/th&gt;
+      &lt;th&gt;Stage_stat&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:15&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:30&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:45&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 1:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3470&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.76&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<p>The values in each column of a Pandas DataFrame can be accessed using the column name. If we want to access more than one column at once, we use a list of column names:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data[[<span class="st">&#39;Discharge_cfs&#39;</span>,<span class="st">&#39;Stage_ft&#39;</span>]].head()</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;Discharge_cfs&lt;/th&gt;
+      &lt;th&gt;Stage_ft&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;3470&lt;/td&gt;
+      &lt;td&gt;3.76&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<p>We can also create new columns using this syntax:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data[<span class="st">&#39;Stage_m&#39;</span>] <span class="op">=</span> data[<span class="st">&#39;Stage_ft&#39;</span>] <span class="op">*</span> <span class="fl">0.3048</span>
+data[<span class="st">&#39;Stage_m&#39;</span>].head()</code></pre></div>
+<pre class="output"><code>0    1.152144
+1    1.152144
+2    1.149096
+3    1.149096
+4    1.146048
+Name: Stage_m, dtype: float64</code></pre>
+<h2 id="fixing-the-station-name">Fixing the station name</h2>
+<p>When Pandas imported the data, it read the station name as an integer and removed the initial zero. We can fix the station name by replacing the values of that column.</p>
+<p>Remember that we are doing all of this so we can later automate the process for multiple stations. Instead of writing the corrected station name ourselves, let’s build it from the values available in the DataFrame:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data[<span class="st">&#39;Station&#39;</span>].unique()</code></pre></div>
+<pre class="output"><code>array([9163500])</code></pre>
+<p>The Pandas method <code>unique</code> returns a <code>numpy</code> array of the unique elements in the DataFrame. We want the first (and only) entry to that array, which has the index 0. We can build a string with the correct station name by <strong>casting</strong> that integer as a string and concatenating with an initial zero:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">new_station_name <span class="op">=</span> <span class="st">&quot;0&quot;</span> <span class="op">+</span> <span class="bu">str</span>(data[<span class="st">&#39;Station&#39;</span>].unique()[<span class="dv">0</span>])
+<span class="bu">print</span> new_station_name</code></pre></div>
+<pre class="output"><code>09163500</code></pre>
+<p>We can replace all values in the ‘Station’ column with this string by assignment, and we can check the object type of each column to make sure it is no longer an integer:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data[<span class="st">&#39;Station&#39;</span>] <span class="op">=</span> new_station_name
+data.head()</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;Agency&lt;/th&gt;
+      &lt;th&gt;Station&lt;/th&gt;
+      &lt;th&gt;OldDateTime&lt;/th&gt;
+      &lt;th&gt;Timezone&lt;/th&gt;
+      &lt;th&gt;Discharge_cfs&lt;/th&gt;
+      &lt;th&gt;Discharge_stat&lt;/th&gt;
+      &lt;th&gt;Stage_ft&lt;/th&gt;
+      &lt;th&gt;Stage_stat&lt;/th&gt;
+      &lt;th&gt;Stage_m&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.152144&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:15&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.152144&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:30&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.149096&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:45&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.149096&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 1:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3470&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.76&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.146048&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data.dtypes</code></pre></div>
+<pre class="output"><code>Agency             object
+Station            object
+OldDateTime        object
+Timezone           object
+Discharge_cfs       int64
+Discharge_stat     object
+Stage_ft          float64
+Stage_stat         object
+Stage_m           float64
+dtype: object</code></pre>
+<h2 id="handling-date-and-time-stamps">Handling date and time stamps</h2>
+<p>Different programming languages and software packages handle date and time stamps in their own unique and obscure ways. Pandas has a set of functions for creating and managing timeseries that is well described in the documentation.</p>
+<p>We need to convert the entries in the DateTime column into a format that Pandas recognizes. Luckily, the <code>to_datetime</code> function in the Pandas library can convert it directly:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data[<span class="st">&#39;DateTime&#39;</span>] <span class="op">=</span> pd.to_datetime(data[<span class="st">&#39;OldDateTime&#39;</span>])
+data.head()</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;Agency&lt;/th&gt;
+      &lt;th&gt;Station&lt;/th&gt;
+      &lt;th&gt;OldDateTime&lt;/th&gt;
+      &lt;th&gt;Timezone&lt;/th&gt;
+      &lt;th&gt;Discharge_cfs&lt;/th&gt;
+      &lt;th&gt;Discharge_stat&lt;/th&gt;
+      &lt;th&gt;Stage_ft&lt;/th&gt;
+      &lt;th&gt;Stage_stat&lt;/th&gt;
+      &lt;th&gt;Stage_m&lt;/th&gt;
+      &lt;th&gt;DateTime&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.152144&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:00:00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:15&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.152144&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:15:00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:30&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.149096&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:30:00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:45&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.149096&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:45:00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 1:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3470&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.76&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.146048&lt;/td&gt;
+      &lt;td&gt;2016-01-01 01:00:00&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<h2 id="data-subsets-and-removing-columns">Data subsets and removing columns</h2>
+<p>The entries in our DataFrame <code>data</code> are indexed by the number in <strong>bold</strong> on the left side of the row. We can display a slice of the data using index ranges:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data[<span class="dv">0</span>:<span class="dv">4</span>]</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;Agency&lt;/th&gt;
+      &lt;th&gt;Station&lt;/th&gt;
+      &lt;th&gt;OldDateTime&lt;/th&gt;
+      &lt;th&gt;Timezone&lt;/th&gt;
+      &lt;th&gt;Discharge_cfs&lt;/th&gt;
+      &lt;th&gt;Discharge_stat&lt;/th&gt;
+      &lt;th&gt;Stage_ft&lt;/th&gt;
+      &lt;th&gt;Stage_stat&lt;/th&gt;
+      &lt;th&gt;Stage_m&lt;/th&gt;
+      &lt;th&gt;DateTime&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.152144&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:00:00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:15&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.152144&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:15:00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:30&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.149096&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:30:00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;1/1/16 0:45&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;1.149096&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:45:00&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="loc-or-iloc"><span class="glyphicon glyphicon-pushpin"></span><code>loc</code> or <code>iloc</code>?</h2>
+</div>
+<div class="panel-body">
+<p>Accessing individual rows or subsets of both rows and columns is a bit more obscure. We can select specific ranges of our data in both the row and column directions using either label or integer-based indexing.</p>
+<ul>
+<li><code>loc</code>: indexing via labels or integers</li>
+<li><code>iloc</code>: indexing via integers</li>
+</ul>
+<p>To select a subset of rows AND columns from our DataFrame, we can use the <code>iloc</code> method and the integer indices for both rows and columns:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data.iloc[<span class="dv">0</span>:<span class="dv">2</span>,<span class="op">-</span><span class="dv">2</span>:]</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;Stage_m&lt;/th&gt;
+      &lt;th&gt;DateTime&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;1.152144&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:00:00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;1.152144&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:15:00&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<p>Or the <code>loc</code> method, using integer indices for rows and labels for columns:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data.loc[<span class="dv">0</span>:<span class="dv">2</span>, [<span class="st">&#39;DateTime&#39;</span>, <span class="st">&#39;Stage_m&#39;</span>]]</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;DateTime&lt;/th&gt;
+      &lt;th&gt;Stage_m&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;2016-01-01 00:00:00&lt;/td&gt;
+      &lt;td&gt;1.152144&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;2016-01-01 00:15:00&lt;/td&gt;
+      &lt;td&gt;1.152144&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;2016-01-01 00:30:00&lt;/td&gt;
+      &lt;td&gt;1.149096&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<p>The number of rows that these two commands return is different! The method <code>iloc</code> behaves like other sequences in Python, ignoring the end bound. With <code>loc</code>, however, the start and end bounds of the row indices are included. Compare them using the <code>shape</code> method:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">print</span> <span class="st">&#39;With iloc:&#39;</span>, data.iloc[<span class="dv">0</span>:<span class="dv">2</span>,<span class="op">-</span><span class="dv">2</span>:].shape
+<span class="bu">print</span> <span class="st">&#39;With loc:&#39;</span>, data.loc[<span class="dv">0</span>:<span class="dv">2</span>, [<span class="st">&#39;DateTime&#39;</span>, <span class="st">&#39;Stage_m&#39;</span>]].shape</code></pre></div>
+<pre class="output"><code>With iloc: (2, 2)
+With loc: (3, 2)</code></pre>
+</div>
+</aside>
+<p>Since we can call individual columns (or lists of columns) from a DataFrame, the simplest way to remove columns is by creating new DataFrames with only the columns we want:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">clean_data <span class="op">=</span> data[[<span class="st">&#39;Station&#39;</span>, <span class="st">&#39;DateTime&#39;</span>, <span class="st">&#39;Discharge_cfs&#39;</span>, <span class="st">&#39;Stage_ft&#39;</span>]]
+clean_data.head()</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;Station&lt;/th&gt;
+      &lt;th&gt;DateTime&lt;/th&gt;
+      &lt;th&gt;Discharge_cfs&lt;/th&gt;
+      &lt;th&gt;Stage_ft&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:00:00&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:15:00&lt;/td&gt;
+      &lt;td&gt;3510&lt;/td&gt;
+      &lt;td&gt;3.78&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:30:00&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:45:00&lt;/td&gt;
+      &lt;td&gt;3490&lt;/td&gt;
+      &lt;td&gt;3.77&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;09163500&lt;/td&gt;
+      &lt;td&gt;2016-01-01 01:00:00&lt;/td&gt;
+      &lt;td&gt;3470&lt;/td&gt;
+      &lt;td&gt;3.76&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<h2 id="plotting-stage-and-discharge">Plotting stage and discharge</h2>
+<p>Pandas is well integrated with the <code>matplotlib</code> library that we used ealier in the tutorial. We can use the same functions we used before with <code>numpy</code> arrays, or we can use the plotting functions built into Pandas:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt
+<span class="op">%</span>matplotlib inline
+
+plt.plot(data[<span class="st">&#39;DateTime&#39;</span>], data[<span class="st">&#39;Discharge_cfs&#39;</span>])
+plt.title(<span class="st">&#39;Station &#39;</span> <span class="op">+</span> data[<span class="st">&#39;Station&#39;</span>][<span class="dv">0</span>])</code></pre></div>
+<pre class="output"><code>&lt;matplotlib.text.Text at 0x10a6884d0&gt;
+![png](fig/output_37_1.png)</code></pre>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data.plot(x<span class="op">=</span><span class="st">&#39;DateTime&#39;</span>, y<span class="op">=</span><span class="st">&#39;Discharge_cfs&#39;</span>, title<span class="op">=</span><span class="st">&#39;Station &#39;</span> <span class="op">+</span> data[<span class="st">&#39;Station&#39;</span>][<span class="dv">0</span>])</code></pre></div>
+<pre class="output"><code>&lt;matplotlib.axes._subplots.AxesSubplot at 0x109eec810&gt;
+![png](fig/output_38_1.png)</code></pre>
+<p>We can use <code>pyplot</code> methods to customize the Pandas plot and save the figure:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data.plot(x<span class="op">=</span><span class="st">&#39;DateTime&#39;</span>, y<span class="op">=</span><span class="st">&#39;Discharge_cfs&#39;</span>, title<span class="op">=</span><span class="st">&#39;Station &#39;</span> <span class="op">+</span> data[<span class="st">&#39;Station&#39;</span>][<span class="dv">0</span>])
+plt.xlabel(<span class="st">&#39;Time&#39;</span>)
+plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
+plt.show()
+plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> data[<span class="st">&#39;Station&#39;</span>][<span class="dv">0</span>] <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)</code></pre></div>
+<pre class="output"><code>![png](fig/output_40_0.png)
+&lt;matplotlib.figure.Figure at 0x10b205890&gt;</code></pre>
+<h2 id="putting-it-all-together">Putting it all together</h2>
+<p>Let’s go back through the code we’ve written and put together just the commands we need to import data and make a plot of discharge.</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> pandas <span class="im">as</span> pd
+<span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt
+<span class="op">%</span>matplotlib inline
+
+data <span class="op">=</span> pd.read_csv(<span class="st">&#39;data/streamgage.csv&#39;</span>)
+
+new_column_names <span class="op">=</span> [<span class="st">&#39;Agency&#39;</span>, <span class="st">&#39;Station&#39;</span>, <span class="st">&#39;OldDateTime&#39;</span>, <span class="st">&#39;Timezone&#39;</span>, <span class="st">&#39;Discharge_cfs&#39;</span>, <span class="st">&#39;Discharge_stat&#39;</span>, <span class="st">&#39;Stage_ft&#39;</span>, <span class="st">&#39;Stage_stat&#39;</span>]
+data.columns <span class="op">=</span> new_column_names
+
+data[<span class="st">&#39;DateTime&#39;</span>] <span class="op">=</span> pd.to_datetime(data[<span class="st">&#39;OldDateTime&#39;</span>])
+
+new_station_name <span class="op">=</span> <span class="st">&quot;0&quot;</span> <span class="op">+</span> <span class="bu">str</span>(data[<span class="st">&#39;Station&#39;</span>].unique()[<span class="dv">0</span>])
+data[<span class="st">&#39;Station&#39;</span>] <span class="op">=</span> new_station_name
+
+data.plot(x<span class="op">=</span><span class="st">&#39;DateTime&#39;</span>, y<span class="op">=</span><span class="st">&#39;Discharge_cfs&#39;</span>, title<span class="op">=</span><span class="st">&#39;Station &#39;</span> <span class="op">+</span> new_station_name)
+plt.xlabel(<span class="st">&#39;Time&#39;</span>)
+plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
+plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> new_station_name <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)
+plt.show()</code></pre></div>
+<pre class="output"><code>![png](fig/output_42_0.png)</code></pre>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/python-novice-inflammation">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>

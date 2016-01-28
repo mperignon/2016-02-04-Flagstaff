@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: Programming with Python</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">Programming with Python</h1></a>
+          <h2 class="subtitle">Automating with Web Services</h2>
+          <section class="objectives panel panel-warning">
+<div class="panel-heading">
+<h2 id="learning-objectives"><span class="glyphicon glyphicon-certificate"></span>Learning Objectives</h2>
+</div>
+<div class="panel-body">
+<ul>
+<li>Explain what a for loop does.</li>
+<li>Correctly write for loops to repeat simple calculations.</li>
+<li>Trace changes to a loop variable as the loop runs.</li>
+<li>Trace changes to other variables as they are updated by a for loop.</li>
+</ul>
+</div>
+</section>
+<p>In the previous chapter, we developed a short script for loading some pre-processed streamgage data into Python using the Pandas library, converting some columns into the correct format, plotting the data, and saving the figures to files.</p>
+<p>Our goal is to create a fully automated workflow that can produce plots for multiple stations without requiring any hand processing of the data. In this chapter, we are going to replace the initial import step in our previous code. Instead, we are going to request the data directly through the USGS web services with a short script.</p>
+<p>Web services are automated tools for transfering data directly from machine to machine. Effectively, the code we write will ask a server for some data, and that server will hand it back to your code. The way that these commands and data are transferred is through an API (Application Programming Interface), which is essertially a set of functions and protocols for that interaction. We don’t actually need to understand in detail what any of that means to use it, though - help pages are our friend!</p>
+<p>Let’s start by request data from the streamgage station at Lee’s Ferry. We’ll make a variable with the station number (which I looked up):</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">station <span class="op">=</span> <span class="dv">09380000</span></code></pre></div>
+<pre class="error"><code>  File &quot;&lt;ipython-input-1-6f8681f3257f&gt;&quot;, line 1
+    station = 09380000
+                     ^
+SyntaxError: invalid token</code></pre>
+<p>An integer cannot start with a zero, so Python doesn’t know what we mean and produces a Syntax Error. Let’s rewrite the station number as a string by putting it in quotes (single or double both work):</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">station <span class="op">=</span> <span class="st">&#39;09380000&#39;</span></code></pre></div>
+<p>We are interested in data between two specific dates:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">start_date <span class="op">=</span> <span class="st">&#39;2016-01-01&#39;</span>
+end_date <span class="op">=</span> <span class="st">&#39;2016-01-10&#39;</span></code></pre></div>
+<p>Data is accesed through APIs using URLs that contain the different pieces of information that the server needs to identify the data that we need. The USGS has a nifty little tool for helping us compose the URL:</p>
+<p>http://waterservices.usgs.gov/rest/IV-Test-Tool.html</p>
+<p>Let’s use that tool to create the URL for the data we want:</p>
+<p>http://waterservices.usgs.gov/nwis/iv/?format=rdb&amp;sites=09380000&amp;startDT=2016-01-01&amp;endDT=2016-01-10&amp;parameterCd=00060,00065</p>
+<p>If we go to that URL, we could just download that file and process it manually. We don’t want to do that.</p>
+<p>Let’s start by making a variable <code>url</code> for the URL of the data we want:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">url <span class="op">=</span> <span class="st">&#39;http://waterservices.usgs.gov/nwis/iv/?format=rdb&amp;sites=09380000&amp;startDT=2016-01-01&amp;endDT=2016-01-10&amp;parameterCd=00060,00065&#39;</span></code></pre></div>
+<pre class="output"><code>We previously used the Pandas method `read_csv` to load a comma-delimited file into Python. That method can also receive a URL as the address to the file:</code></pre>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> pandas <span class="im">as</span> pd
+
+pd.read_csv(url)</code></pre></div>
+<pre class="error"><code>---------------------------------------------------------------------------
+
+CParserError                              Traceback (most recent call last)
+
+&lt;ipython-input-5-ab590da0ab09&gt; in &lt;module&gt;()
+      1 import pandas as pd
+      2 
+----&gt; 3 pd.read_csv(url)
+
+
+//anaconda/lib/python2.7/site-packages/pandas/io/parsers.pyc in parser_f(filepath_or_buffer, sep, dialect, compression, doublequote, escapechar, quotechar, quoting, skipinitialspace, lineterminator, header, index_col, names, prefix, skiprows, skipfooter, skip_footer, na_values, true_values, false_values, delimiter, converters, dtype, usecols, engine, delim_whitespace, as_recarray, na_filter, compact_ints, use_unsigned, low_memory, buffer_lines, warn_bad_lines, error_bad_lines, keep_default_na, thousands, comment, decimal, parse_dates, keep_date_col, dayfirst, date_parser, memory_map, float_precision, nrows, iterator, chunksize, verbose, encoding, squeeze, mangle_dupe_cols, tupleize_cols, infer_datetime_format, skip_blank_lines)
+    496                     skip_blank_lines=skip_blank_lines)
+    497 
+--&gt; 498         return _read(filepath_or_buffer, kwds)
+    499 
+    500     parser_f.__name__ = name
+
+
+//anaconda/lib/python2.7/site-packages/pandas/io/parsers.pyc in _read(filepath_or_buffer, kwds)
+    283         return parser
+    284 
+--&gt; 285     return parser.read()
+    286 
+    287 _parser_defaults = {
+
+
+//anaconda/lib/python2.7/site-packages/pandas/io/parsers.pyc in read(self, nrows)
+    745                 raise ValueError(&#39;skip_footer not supported for iteration&#39;)
+    746 
+--&gt; 747         ret = self._engine.read(nrows)
+    748 
+    749         if self.options.get(&#39;as_recarray&#39;):
+
+
+//anaconda/lib/python2.7/site-packages/pandas/io/parsers.pyc in read(self, nrows)
+   1195     def read(self, nrows=None):
+   1196         try:
+-&gt; 1197             data = self._reader.read(nrows)
+   1198         except StopIteration:
+   1199             if self._first_chunk:
+
+
+pandas/parser.pyx in pandas.parser.TextReader.read (pandas/parser.c:7988)()
+
+
+pandas/parser.pyx in pandas.parser.TextReader._read_low_memory (pandas/parser.c:8244)()
+
+
+pandas/parser.pyx in pandas.parser.TextReader._read_rows (pandas/parser.c:8970)()
+
+
+pandas/parser.pyx in pandas.parser.TextReader._tokenize_rows (pandas/parser.c:8838)()
+
+
+pandas/parser.pyx in pandas.parser.raise_parser_error (pandas/parser.c:22649)()
+
+
+CParserError: Error tokenizing data. C error: Expected 1 fields in line 12, saw 2</code></pre>
+<p>Pandas is unhappy and cannot load our file. The parser, a script responsible for converting the text in the file into a data structure inside Python, expects one line of column titles and then data with the same number of columns. Open the URL in a separate tab in your web browser and examine the file. The header is making it appear like the number of columns is charging part way through the file.</p>
+<p>The most widely used libraries in Python are very well documented. The help file for the specific function we are trying to use will contain information about the options that might let us read the file while ignoring the header:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">help</span>(pd.read_csv)</code></pre></div>
+<pre class="output"><code>    Help on function read_csv in module pandas.io.parsers:
+    
+    read_csv(filepath_or_buffer, sep=&#39;,&#39;, dialect=None, compression=&#39;infer&#39;, doublequote=True, escapechar=None, quotechar=&#39;&quot;&#39;, quoting=0, skipinitialspace=False, lineterminator=None, header=&#39;infer&#39;, index_col=None, names=None, prefix=None, skiprows=None, skipfooter=None, skip_footer=0, na_values=None, true_values=None, false_values=None, delimiter=None, converters=None, dtype=None, usecols=None, engine=None, delim_whitespace=False, as_recarray=False, na_filter=True, compact_ints=False, use_unsigned=False, low_memory=True, buffer_lines=None, warn_bad_lines=True, error_bad_lines=True, keep_default_na=True, thousands=None, comment=None, decimal=&#39;.&#39;, parse_dates=False, keep_date_col=False, dayfirst=False, date_parser=None, memory_map=False, float_precision=None, nrows=None, iterator=False, chunksize=None, verbose=False, encoding=None, squeeze=False, mangle_dupe_cols=True, tupleize_cols=False, infer_datetime_format=False, skip_blank_lines=True)
+        Read CSV (comma-separated) file into DataFrame
+        
+        Also supports optionally iterating or breaking of the file
+        into chunks.
+        
+        Additional help can be found in the `online docs for IO Tools
+        &lt;http://pandas.pydata.org/pandas-docs/stable/io.html&gt;`_.
+        
+        Parameters
+        ----------
+        filepath_or_buffer : string or file handle / StringIO
+            The string could be a URL. Valid URL schemes include
+            http, ftp, s3, and file. For file URLs, a
+            host is expected. For instance, a local file could be
+            file ://localhost/path/to/table.csv
+        sep : string, default &#39;,&#39;
+            Delimiter to use. If sep is None, will try to automatically determine
+            this. Regular expressions are accepted.
+        engine : {&#39;c&#39;, &#39;python&#39;}
+            Parser engine to use. The C engine is faster while the python engine is
+            currently more feature-complete.
+        lineterminator : string (length 1), default None
+            Character to break file into lines. Only valid with C parser
+        quotechar : string (length 1)
+            The character used to denote the start and end of a quoted item. Quoted
+            items can include the delimiter and it will be ignored.
+        quoting : int or csv.QUOTE_* instance, default None
+            Control field quoting behavior per ``csv.QUOTE_*`` constants. Use one of
+            QUOTE_MINIMAL (0), QUOTE_ALL (1), QUOTE_NONNUMERIC (2) or QUOTE_NONE (3).
+            Default (None) results in QUOTE_MINIMAL behavior.
+        skipinitialspace : boolean, default False
+            Skip spaces after delimiter
+        escapechar : string (length 1), default None
+            One-character string used to escape delimiter when quoting is QUOTE_NONE.
+        dtype : Type name or dict of column -&gt; type, default None
+            Data type for data or columns. E.g. {&#39;a&#39;: np.float64, &#39;b&#39;: np.int32}
+            (Unsupported with engine=&#39;python&#39;)
+        compression : {&#39;gzip&#39;, &#39;bz2&#39;, &#39;infer&#39;, None}, default &#39;infer&#39;
+            For on-the-fly decompression of on-disk data. If &#39;infer&#39;, then use gzip or
+            bz2 if filepath_or_buffer is a string ending in &#39;.gz&#39; or &#39;.bz2&#39;,
+            respectively, and no decompression otherwise. Set to None for no
+            decompression.
+        dialect : string or csv.Dialect instance, default None
+            If None defaults to Excel dialect. Ignored if sep longer than 1 char
+            See csv.Dialect documentation for more details
+        header : int, list of ints, default &#39;infer&#39;
+            Row number(s) to use as the column names, and the start of the
+            data.  Defaults to 0 if no ``names`` passed, otherwise ``None``. Explicitly
+            pass ``header=0`` to be able to replace existing names. The header can be
+            a list of integers that specify row locations for a multi-index on the
+            columns E.g. [0,1,3]. Intervening rows that are not specified will be
+            skipped (e.g. 2 in this example are skipped). Note that this parameter
+            ignores commented lines and empty lines if ``skip_blank_lines=True``, so header=0
+            denotes the first line of data rather than the first line of the file.
+        skiprows : list-like or integer, default None
+            Line numbers to skip (0-indexed) or number of lines to skip (int)
+            at the start of the file
+        index_col : int or sequence or False, default None
+            Column to use as the row labels of the DataFrame. If a sequence is given, a
+            MultiIndex is used. If you have a malformed file with delimiters at the end
+            of each line, you might consider index_col=False to force pandas to _not_
+            use the first column as the index (row names)
+        names : array-like, default None
+            List of column names to use. If file contains no header row, then you
+            should explicitly pass header=None
+        prefix : string, default None
+            Prefix to add to column numbers when no header, e.g &#39;X&#39; for X0, X1, ...
+        na_values : str, list-like or dict, default None
+            Additional strings to recognize as NA/NaN. If dict passed, specific
+            per-column NA values
+        true_values : list, default None
+            Values to consider as True
+        false_values : list, default None
+            Values to consider as False
+        keep_default_na : bool, default True
+            If na_values are specified and keep_default_na is False the default NaN
+            values are overridden, otherwise they&#39;re appended to
+        parse_dates : boolean, list of ints or names, list of lists, or dict, default False
+            If True -&gt; try parsing the index.
+            If [1, 2, 3] -&gt; try parsing columns 1, 2, 3 each as a separate date column.
+            If [[1, 3]] -&gt; combine columns 1 and 3 and parse as a single date column.
+            {&#39;foo&#39; : [1, 3]} -&gt; parse columns 1, 3 as date and call result &#39;foo&#39;
+            A fast-path exists for iso8601-formatted dates.
+        keep_date_col : boolean, default False
+            If True and parse_dates specifies combining multiple columns then
+            keep the original columns.
+        date_parser : function, default None
+            Function to use for converting a sequence of string columns to an
+            array of datetime instances. The default uses dateutil.parser.parser
+            to do the conversion. Pandas will try to call date_parser in three different
+            ways, advancing to the next if an exception occurs: 1) Pass one or more arrays
+            (as defined by parse_dates) as arguments; 2) concatenate (row-wise) the string
+            values from the columns defined by parse_dates into a single array and pass
+            that; and 3) call date_parser once for each row using one or more strings
+            (corresponding to the columns defined by parse_dates) as arguments.
+        dayfirst : boolean, default False
+            DD/MM format dates, international and European format
+        thousands : str, default None
+            Thousands separator
+        comment : str, default None
+            Indicates remainder of line should not be parsed. If found at the
+            beginning of a line, the line will be ignored altogether. This parameter
+            must be a single character. Like empty lines (as long as ``skip_blank_lines=True``),
+            fully commented lines are ignored by the parameter `header`
+            but not by `skiprows`. For example, if comment=&#39;#&#39;, parsing
+            &#39;#empty\na,b,c\n1,2,3&#39; with `header=0` will result in &#39;a,b,c&#39; being
+            treated as the header.
+        decimal : str, default &#39;.&#39;
+            Character to recognize as decimal point. E.g. use &#39;,&#39; for European data
+        nrows : int, default None
+            Number of rows of file to read. Useful for reading pieces of large files
+        iterator : boolean, default False
+            Return TextFileReader object for iteration or getting chunks with ``get_chunk()``.
+        chunksize : int, default None
+            Return TextFileReader object for iteration. `See IO Tools docs for more
+            information
+            &lt;http://pandas.pydata.org/pandas-docs/stable/io.html#io-chunking&gt;`_ on
+            ``iterator`` and ``chunksize``.
+        skipfooter : int, default 0
+            Number of lines at bottom of file to skip (Unsupported with engine=&#39;c&#39;)
+        converters : dict, default None
+            Dict of functions for converting values in certain columns. Keys can either
+            be integers or column labels
+        verbose : boolean, default False
+            Indicate number of NA values placed in non-numeric columns
+        delimiter : string, default None
+            Alternative argument name for sep. Regular expressions are accepted.
+        encoding : string, default None
+            Encoding to use for UTF when reading/writing (ex. &#39;utf-8&#39;). `List of Python
+            standard encodings
+            &lt;https://docs.python.org/3/library/codecs.html#standard-encodings&gt;`_
+        squeeze : boolean, default False
+            If the parsed data only contains one column then return a Series
+        na_filter : boolean, default True
+            Detect missing value markers (empty strings and the value of na_values). In
+            data without any NAs, passing na_filter=False can improve the performance
+            of reading a large file
+        usecols : array-like, default None
+            Return a subset of the columns.
+            Results in much faster parsing time and lower memory usage.
+        mangle_dupe_cols : boolean, default True
+            Duplicate columns will be specified as &#39;X.0&#39;...&#39;X.N&#39;, rather than &#39;X&#39;...&#39;X&#39;
+        tupleize_cols : boolean, default False
+            Leave a list of tuples on columns as is (default is to convert to
+            a Multi Index on the columns)
+        error_bad_lines : boolean, default True
+            Lines with too many fields (e.g. a csv line with too many commas) will by
+            default cause an exception to be raised, and no DataFrame will be returned.
+            If False, then these &quot;bad lines&quot; will dropped from the DataFrame that is
+            returned. (Only valid with C parser)
+        warn_bad_lines : boolean, default True
+            If error_bad_lines is False, and warn_bad_lines is True, a warning for each
+            &quot;bad line&quot; will be output. (Only valid with C parser).
+        infer_datetime_format : boolean, default False
+            If True and parse_dates is enabled for a column, attempt to infer
+            the datetime format to speed up the processing
+        skip_blank_lines : boolean, default True
+            If True, skip over blank lines rather than interpreting as NaN values
+        
+        Returns
+        -------
+        result : DataFrame or TextParser</code></pre>
+<p>A way to see the documentation as a separate window within an iPython notebook is with a question mark:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">pd.read_csv?</code></pre></div>
+<p>The function <code>read_csv</code> requires the first parameter (a filepath) and accepts many optional parameters (if not set, they use a default value). For example, <code>sep=','</code> is an optional function parameter that defines the column separator. By default, it’s a comma.</p>
+<p>Let’s try loading our file again. Because the columns in our file are separated by tabs, we need to set the <code>sep</code> parameter. To remove the header, we will also tell Pandas that lines that start with <code>#</code> are comments and it should not import them.</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data <span class="op">=</span> pd.read_csv(url, sep<span class="op">=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>, comment<span class="op">=</span><span class="st">&#39;#&#39;</span>)
+data.head()</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;agency_cd&lt;/th&gt;
+      &lt;th&gt;site_no&lt;/th&gt;
+      &lt;th&gt;datetime&lt;/th&gt;
+      &lt;th&gt;tz_cd&lt;/th&gt;
+      &lt;th&gt;01_00060&lt;/th&gt;
+      &lt;th&gt;01_00060_cd&lt;/th&gt;
+      &lt;th&gt;02_00065&lt;/th&gt;
+      &lt;th&gt;02_00065_cd&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;5s&lt;/td&gt;
+      &lt;td&gt;15s&lt;/td&gt;
+      &lt;td&gt;20d&lt;/td&gt;
+      &lt;td&gt;6s&lt;/td&gt;
+      &lt;td&gt;14n&lt;/td&gt;
+      &lt;td&gt;10s&lt;/td&gt;
+      &lt;td&gt;14n&lt;/td&gt;
+      &lt;td&gt;10s&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;15200&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.74&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:15&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;14900&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.67&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:30&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;14600&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.62&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;09380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:45&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;14200&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.55&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<p>There’s our file! Pandas read the first row of the file as the column headers and everything below that as data, but row 0 doesn’t belong. We can tell the function <code>read_csv</code> to use the second row of the file as the column headers and ignore the first row so at least our data is imported correctly:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data <span class="op">=</span> pd.read_csv(url, header<span class="op">=</span><span class="dv">1</span>, sep<span class="op">=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>, comment<span class="op">=</span><span class="st">&#39;#&#39;</span>)
+data.head()</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;5s&lt;/th&gt;
+      &lt;th&gt;15s&lt;/th&gt;
+      &lt;th&gt;20d&lt;/th&gt;
+      &lt;th&gt;6s&lt;/th&gt;
+      &lt;th&gt;14n&lt;/th&gt;
+      &lt;th&gt;10s&lt;/th&gt;
+      &lt;th&gt;14n.1&lt;/th&gt;
+      &lt;th&gt;10s.1&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;15200&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.74&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:15&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;14900&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.67&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:30&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;14600&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.62&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:45&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;14200&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.55&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 01:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;14000&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.49&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<p>Of course, the column headers are now wrong! We were planning to rename them, so let’s just do that during import:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">new_column_names <span class="op">=</span> [<span class="st">&#39;Agency&#39;</span>, <span class="st">&#39;Station&#39;</span>, <span class="st">&#39;OldDateTime&#39;</span>, <span class="st">&#39;Timezone&#39;</span>, <span class="st">&#39;Discharge_cfs&#39;</span>, <span class="st">&#39;Discharge_stat&#39;</span>, <span class="st">&#39;Stage_ft&#39;</span>, <span class="st">&#39;Stage_stat&#39;</span>]
+
+data <span class="op">=</span> pd.read_csv(url, header<span class="op">=</span><span class="dv">1</span>, sep<span class="op">=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>, comment<span class="op">=</span><span class="st">&#39;#&#39;</span>, names <span class="op">=</span> new_column_names)
+data.head()</code></pre></div>
+<pre class="output"><code>&lt;div&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;Agency&lt;/th&gt;
+      &lt;th&gt;Station&lt;/th&gt;
+      &lt;th&gt;OldDateTime&lt;/th&gt;
+      &lt;th&gt;Timezone&lt;/th&gt;
+      &lt;th&gt;Discharge_cfs&lt;/th&gt;
+      &lt;th&gt;Discharge_stat&lt;/th&gt;
+      &lt;th&gt;Stage_ft&lt;/th&gt;
+      &lt;th&gt;Stage_stat&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;15200&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.74&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:15&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;14900&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.67&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:30&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;14600&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.62&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 00:45&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;14200&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.55&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;USGS&lt;/td&gt;
+      &lt;td&gt;9380000&lt;/td&gt;
+      &lt;td&gt;2016-01-01 01:00&lt;/td&gt;
+      &lt;td&gt;MST&lt;/td&gt;
+      &lt;td&gt;14000&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+      &lt;td&gt;9.49&lt;/td&gt;
+      &lt;td&gt;P&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="why-not-just-delete-the-bad-row"><span class="glyphicon glyphicon-pushpin"></span>Why not just delete the bad row?</h2>
+</div>
+<div class="panel-body">
+<p>In the previous lesson, we saw we could create new DataFrames that contained just a subset of the rows of an existing DataFrame. Why did we go through so much trouble to avoid importing the “bad” row in with the data?</p>
+<p>One consideration is memory space and speed. If we had simply copied the good rows into a new DataFrame, Python would have created a new copy of the data, occupying available memory and taking some time. While the extra computational expenses are negligible for these small datasets, they quickly add up! By fixing those issues as we are importing the data, we create only one copy of the DataFrame from the start.</p>
+<p>The second concern is less obvious but could potentially complicate how we handle the data later on. Each column in the DataFrame has a data type that restricts what can be done with the data (check them with <code>data.dtypes</code>). Columns of the type <code>object</code>, for example, contain strings and cannot be used in mathematical expressions. When the “bad” row was included in the data, the first entry in the columns for stage and discharge were “14n”, forcing Pandas to consider every entry in those columns to be a string instead of an integer or float.</p>
+</div>
+</aside>
+<p>Our script can now import data through the USGS web services in a format that we can use with our existing code! Let’s combine these commands with the code we wrote in the previous lesson. We can copy the old code, comment out (with the symbol #) any rows that we don’t want to use, and add our new commands:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> pandas <span class="im">as</span> pd
+<span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt
+<span class="op">%</span>matplotlib inline
+
+<span class="co"># data = pd.read_csv(&#39;data/streamgage.csv&#39;)</span>
+
+new_column_names <span class="op">=</span> [<span class="st">&#39;Agency&#39;</span>, <span class="st">&#39;Station&#39;</span>, <span class="st">&#39;OldDateTime&#39;</span>, <span class="st">&#39;Timezone&#39;</span>, <span class="st">&#39;Discharge_cfs&#39;</span>, <span class="st">&#39;Discharge_stat&#39;</span>, <span class="st">&#39;Stage_ft&#39;</span>, <span class="st">&#39;Stage_stat&#39;</span>]
+<span class="co"># data.columns = new_column_names</span>
+
+url <span class="op">=</span> <span class="st">&#39;http://waterservices.usgs.gov/nwis/iv/?format=rdb&amp;sites=09380000&amp;startDT=2016-01-01&amp;endDT=2016-01-10&amp;parameterCd=00060,00065&#39;</span>
+data <span class="op">=</span> pd.read_csv(url, header<span class="op">=</span><span class="dv">1</span>, sep<span class="op">=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>, comment<span class="op">=</span><span class="st">&#39;#&#39;</span>, names <span class="op">=</span> new_column_names)
+
+data[<span class="st">&#39;DateTime&#39;</span>] <span class="op">=</span> pd.to_datetime(data[<span class="st">&#39;OldDateTime&#39;</span>])
+
+new_station_name <span class="op">=</span> <span class="st">&quot;0&quot;</span> <span class="op">+</span> <span class="bu">str</span>(data[<span class="st">&#39;Station&#39;</span>].unique()[<span class="dv">0</span>])
+data[<span class="st">&#39;Station&#39;</span>] <span class="op">=</span> new_station_name
+
+data.plot(x<span class="op">=</span><span class="st">&#39;DateTime&#39;</span>, y<span class="op">=</span><span class="st">&#39;Discharge_cfs&#39;</span>, title<span class="op">=</span><span class="st">&#39;Station &#39;</span> <span class="op">+</span> new_station_name)
+plt.xlabel(<span class="st">&#39;Time&#39;</span>)
+plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
+plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> new_station_name <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)
+plt.show()</code></pre></div>
+<pre class="output"><code>![png](fig/output_23_0.png)</code></pre>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/python-novice-inflammation">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>
