@@ -7,19 +7,19 @@ minutes: 30
 > ## Learning Objectives {.objectives}
 >
 > *   Explain what a library is, and what libraries are used for.
-> *   Load a Python library and use the things it contains.
-> *   Read tabular data from a file into a program.
+> *   Load a Python library and use the tools it contains.
+> *   Read data from a file into a program.
 > *   Assign values to variables.
 > *   Select individual values and subsections from data.
 > *   Perform operations on arrays of data.
 > *   Display simple graphs.
 
 While a lot of powerful tools are built into languages like Python,
-even more live in the [libraries](reference.html#library) they are used to build.
+even more tools exist in [libraries](reference.html#library).
 
 In order to load our temperature data,
 we need to [import](reference.html#import) a library called NumPy.
-In general you should use this library if you want to do fancy things with numbers,
+You should use this library if you want to do fancy things with numbers,
 especially if you have matrices or arrays.
 We can load NumPy using:
 
@@ -28,9 +28,9 @@ import numpy
 ~~~
 
 Importing a library is like getting a piece of lab equipment out of a storage locker
-and setting it up on the bench. Libraries provide additional functionality to the basic Python package, much like a new piece of equipment adds functionality to a lab space.
-Once you've loaded the library,
-we can ask the library to read our data file for us:
+and setting it up on the bench. Libraries provide additional functionality to the basic Python packages, much like a new piece of equipment adds functionality to a lab space.
+Once we've loaded the library,
+we can use a tool in that library to read the data file:
 
 ~~~ {.python}
 numpy.loadtxt(fname='data/temperature.csv', delimiter=',')
@@ -45,17 +45,17 @@ array([[ 264.,  264.,  264., ...,  263.,  263.,  264.],
 The expression `numpy.loadtxt(...)` is a [function call](reference.html#function-call)
 that asks Python to run the function `loadtxt` that belongs to the `numpy` library.
 This [dotted notation](reference.html#dotted-notation) is used everywhere in Python
-to refer to the parts of things as `thing.component`.
+to refer to parts of things, with the syntax `thing.component`.
 
-`numpy.loadtxt` has two [parameters](reference.html#parameter):
+The function call to `numpy.loadtxt` has two [parameters](reference.html#parameter):
 the name of the file we want to read,
 and the [delimiter](reference.html#delimiter) that separates values on a line.
 These both need to be character strings (or [strings](reference.html#string) for short),
 so we put them in quotes.
 
-When we are finished typing and press Shift+Enter,
+When we press Shift+Enter,
 the notebook runs our command.
-Since we haven't told it to do anything else with the function's output,
+Since we haven't told it what to do with the function's output,
 the notebook displays it.
 In this case,
 that output is the data we just loaded.
@@ -66,7 +66,7 @@ To save space,
 Python displays numbers as `1.` instead of `1.0`
 when there's nothing interesting after the decimal point.
 
-Our call to `numpy.loadtxt` read our file,
+Our call to `numpy.loadtxt` read our file
 but didn't save the data in memory.
 To do that,
 we need to [assign](reference.html#assignment) the array to a [variable](reference.html#variable).
@@ -75,8 +75,8 @@ such as `x`, `current_temperature`, or `subject_id`.
 Python's variables must begin with a letter and are [case sensitive](reference.html#case-sensitive).
 We can create a new variable by assigning a value to it using `=`.
 As an illustration,
-let's step back and instead of considering a table of data,
-consider the simplest "collection" of data,
+let's step back and instead of using a table of data,
+consider the simplest "collection" of data:
 a single value.
 The line below assigns the value `55` to a variable `weight_kg`:
 
@@ -152,18 +152,18 @@ This is different from the way spreadsheets work.
 
 > ## Who's who in the memory {.callout}
 >
->You can use the `whos` command at any time to see what variables you have created and what modules you have loaded into the computers memory. As this is an IPython command, it will only work if you are in an IPython terminal or the Jupyter Notebook. 
+> You can use the `whos` command at any time to see what variables you have created and what modules you have loaded into the computers memory. As this is an IPython command, it will only work if you are in an IPython terminal or the Jupyter Notebook. 
 >
->~~~ {.python}
->whos
->~~~
->~~~ {.output}
->Variable    Type       Data/Info
->--------------------------------
->numpy       module     <module 'numpy' from '/Us<...>kages/numpy/__init__.py'>
->weight_kg   float      100.0
->weight_lb   float      126.5
->~~~
+> ~~~ {.python}
+> whos
+> ~~~
+> ~~~ {.output}
+> Variable    Type       Data/Info
+> --------------------------------
+> numpy       module     <module 'numpy' from '/Us<...>kages/numpy/__init__.py'>
+> weight_kg   float      100.0
+> weight_lb   float      126.5
+> ~~~
 
 Just as we can assign a single value to a variable, we can also assign an array of values
 to a variable using the same syntax.  Let's re-run `numpy.loadtxt` and save its result:
@@ -172,7 +172,7 @@ to a variable using the same syntax.  Let's re-run `numpy.loadtxt` and save its 
 data = numpy.loadtxt(fname='data/temperature.csv',delimiter=',')
 ~~~
 
-This statement doesn't produce any output because assignment doesn't display anything.
+This statement doesn't produce any output because an assignment doesn't display anything.
 If we want to check that our data has been loaded,
 we can print the variable's value:
 
@@ -198,8 +198,7 @@ print type(data)
 <class 'numpy.ndarray'>
 ~~~
 
-The output tells us that `data` currently refers to an N-dimensional array created by the NumPy library. These data corresponds to arthritis patient's inflammation. The rows are the individual patients and the columns are there daily inflammation measurements.
-We can see what its [shape](reference.html#shape) is like this:
+The output tells us that the variable name `data` currently refers to an N-dimensional array created by the NumPy library. These data are daily average temperature normals (averages of three decades) for four stations around Flagstaff, AZ. We can see what its [shape](reference.html#shape) is like this:
 
 ~~~ {.python}
 print data.shape
@@ -209,7 +208,7 @@ print data.shape
 ~~~
 
 This tells us that `data` has 4 rows and 365 columns. When we created the
-variable `data` to store our temperature data, we didn't just create the array, we also
+variable `data` to store the temperature data, we didn't just create the array. We also
 created information about the array, called [members](reference.html#member) or
 attributes. This extra information describes `data` in
 the same way an adjective describes a noun.
@@ -219,8 +218,7 @@ that we use for the functions in libraries
 because they have the same part-and-whole relationship.
 
 If we want to get a single number from the array,
-we must provide an [index](reference.html#index) in square brackets,
-just as we do in math:
+we must provide an [index](reference.html#index) in square brackets:
 
 ~~~ {.python}
 print 'first value in data:', data[0, 0]
@@ -238,9 +236,10 @@ middle value in data: 696.0
 
 ~~~
 
+When referring to a two dimensional array, indices are numbered as row,column.
 The expression `data[2, 180]` may not surprise you,
 but `data[0, 0]` might.
-Programming languages like Fortran and MATLAB start counting at 1,
+Programming languages like Fortran and MATLAB start counting at 1
 because that's what human beings have done for thousands of years.
 Languages in the C family (including C++, Java, Perl, and Python) count from 0
 because that's simpler for computers to do.
@@ -261,6 +260,29 @@ the index is how many steps we have to take from the start to get the item we wa
 > but different from the Cartesian coordinates.
 > The indices are (row, column) instead of (column, row) for the same reason,
 > which can be confusing when plotting data.
+
+> ## Check your understanding {.challenge}
+>
+> Draw diagrams showing how variable names and values are connected after each statement in the following program:
+>
+> ~~~ {.python}
+> mass = 47.5
+> age = 122
+> mass = mass * 2.0
+> age = age - 20
+> ~~~
+
+> ## Sorting out references {.challenge}
+>
+> What does the following program print out?
+>
+> ~~~ {.python}
+> first, second = 'Grace', 'Hopper'
+> third, fourth = second, first
+> print third, fourth
+> ~~~
+
+## Slicing
 
 An index like `[2, 180]` selects a single element of an array,
 but we can select whole sections as well.
@@ -313,7 +335,7 @@ small is:
  [ 261.  261.  262.  262.  263.]]
 ~~~
 
-Arrays also know how to perform common mathematical operations on their values.
+Arrays also know how to handle common mathematical operations on their values.
 The simplest operations with data are arithmetic:
 add, subtract, multiply, and divide.
  When you do such operations on arrays,
@@ -366,7 +388,6 @@ tripledata:
  [ 783.  783.  786.  786.  789.]]
 ~~~
 
-Often, we want to do more than add, subtract, multiply, and divide values of data.
 Arrays also know how to do more complex operations on their values.
 If we want to find the average temperature on all days across all stations,
 for example,
@@ -383,13 +404,13 @@ print data.mean()
 i.e.,
 a function that belongs to it
 in the same way that the member `shape` does.
-If variables are nouns, methods are verbs:
-they are what the thing in question knows how to do.
-We need empty parentheses for `data.mean()`,
-even when we're not passing in any parameters,
+If variables are nouns, methods are adjectives:
+they are some intrinsic characteristic of the object.
+We need empty parentheses for `data.mean()`
+even when we're not passing in any parameters
 to tell Python to go and do something for us. `data.shape` doesn't
-need `()` because it is just a description but `data.mean()` requires the `()`
-because it is an action.
+need `()` because it is just a description of the object but `data.mean()` requires the `()`
+because something has to be done with the object to find it.
 
 NumPy arrays have lots of useful methods:
 
@@ -406,10 +427,10 @@ standard deviation: 133.797538033
 
 When analyzing data,
 though,
-we often want to look at partial statistics,
-such as the maximum value per station
-or the average value per day.
-One way to do this is to create a new temporary array of the data we want,
+we often want to look at partial statistics
+such as the maximum temperature value per station
+or the average temperature value per day across all stations.
+One way to do this is to create a new temporary array of the data we want, and
 then ask it to do the calculation:
 
 ~~~ {.python}
@@ -420,7 +441,7 @@ print 'maximum temperature for station 0:', station_0.max()
 maximum temperature for station 0: 641.0
 ~~~
 
-We don't actually need to store the row in a variable of its own.
+We don't actually need to store the row in a variable of its own before calculating its statistics.
 Instead, we can combine the selection and the method call:
 
 ~~~ {.python}
@@ -430,8 +451,8 @@ print 'maximum temperature for station 2:', data[2, :].max()
 maximum temperature for station 2: 714.0
 ~~~
 
-If we need the maximum temperature for every stations, or the average for each day, we can perform the
-operation across an axis. To support this,
+If we need the maximum temperature for every station or the average for each day for a single station, we can perform the
+operation across an axis. For this,
 most array methods allow us to specify the axis we want to work on. 
 If we ask for the average across axis 0 (rows in our 2D example),
 we get:
@@ -486,7 +507,7 @@ print data.mean(axis=0)
 ~~~
 
 As a quick check,
-we can ask this array what its shape is:
+we can ask this array for its shape:
 
 ~~~ {.python}
 print data.mean(axis=0).shape
@@ -508,24 +529,39 @@ print data.mean(axis=1)
 
 which is the average temperature per station across all days.
 
+> ## Slicing strings {.challenge}
+>
+> A section of an array is called a [slice](reference.html#slice).
+> We can take slices of character strings as well:
+>
+> ~~~ {.python}
+> element = 'oxygen'
+> print 'first three characters:', element[0:3]
+> print 'last three characters:', element[3:6]
+> ~~~
+>
+> ~~~ {.output}
+> first three characters: oxy
+> last three characters: gen
+> ~~~
+>
+> What is the value of `element[:4]`?
+> What about `element[4:]`?
+> Or `element[:]`?
+>
+> What is `element[-1]`?
+> What is `element[-2]`?
+> Given those answers,
+> explain what `element[1:-1]` does.
+
+## Plotting
+
 The mathematician Richard Hamming once said,
 "The purpose of computing is insight, not numbers,"
 and the best way to develop insight is often to visualize data.
 Visualization deserves an entire lecture (or course) of its own,
-but we can explore a few features of Python's `matplotlib` library here.
-While there is no "official" plotting library,
-this package is the de facto standard.
-First,
-we will import the `pyplot` module from `matplotlib`
-and use two of its functions to create and display a heat map of our data:
-
-~~~ {.python}
-import matplotlib.pyplot
-image  = matplotlib.pyplot.imshow(data)
-matplotlib.pyplot.show(image)
-~~~
-
-![Heatmap of the Data](fig/01-numpy-heatmap-small.png)
+but we will explore a few features of Python's `matplotlib` library here. While there is no "official" plotting library,
+this package is the de facto standard. A great resource for learning about this library is the [Matplotlib gallery](http://matplotlib.org/gallery.html).
 
 > ## Some IPython magic {.callout}
 >
@@ -542,21 +578,33 @@ matplotlib.pyplot.show(image)
 > a function that is only valid within the notebook environment.
 > Note that you only have to execute this function once per notebook.
 
+First,
+we will import the `pyplot` module of `matplotlib`
+and use two of its functions to create and display a heat map of our data:
+
+~~~ {.python}
+import matplotlib.pyplot
+image = matplotlib.pyplot.imshow(data)
+matplotlib.pyplot.show(image)
+~~~
+
+![Heatmap of the Data](fig/01-numpy-heatmap-small.png)
+
 It's very hard to see what the image shows when it's that small. Let's change the aspect ratio:
 
 ~~~ {.python}
-image  = matplotlib.pyplot.imshow(data)
+image = matplotlib.pyplot.imshow(data)
 matplotlib.pyplot.axes().set_aspect('auto')
 matplotlib.pyplot.show(image)
 ~~~
 
 ![Heatmap of the Data with different aspect ratio](fig/01-numpy-heatmap-large.png)
 
-Blue regions in this heat map are low values, while red shows high values.
+Blue regions in this heat map are low values and red regions high values.
 As we can see,
-temperature rises and falls over the year.
+temperature rises and falls over the year, and the magnitudes are very similar across all four stations.
 
-Let's take a look at the average temperature between all the stations over time:
+Let's take a look at the average temperature between all stations over time:
 
 ~~~ {.python}
 ave_temp = data.mean(axis=0)
@@ -574,9 +622,9 @@ tells Python how big to make this space. Each subplot is placed into the figure 
 the `subplot` command. The `subplot` command takes 3 parameters. The first denotes
 how many total rows of subplots there are, the second parameter refers to the
 total number of subplot columns, and the final parameters denotes which subplot
-your variable is referencing. Each subplot is stored in a different variable (axes1, axes2,
-axes3, axes4). Once a subplot is created, the axes are can be titled using the
-`set_xlabel()` command (or `set_ylabel()`).
+your axes name will reference. Each subplot is stored in a different variable (axes1, axes2,
+axes3, axes4). Once a subplot is created, the axes can be titled using the
+`set_xlabel()` or `set_ylabel()` commands.
 Here are our four plots stacked:
 
 ~~~ {.python}
@@ -609,73 +657,16 @@ plt.show(fig)
 
 ![Temperature at each Station as Subplots](fig/01-numpy-subplots.png)
 
-We first import the necessary libraries into our script. In this case, we gave them shortcut or nickname ("np" and "plt") to avoid typing so much. 
-The [call](reference.html#function-call) to `loadtxt` reads our data,
+When we imported the necessary libraries into this script, we assigned a [shortcut or nickname](http://www.scipy.org/getting-started.html#an-example-script) to them ("np" and "plt") to avoid having to type the full name each time. As before, the [call](reference.html#function-call) to `loadtxt` reads our data,
 and the rest of the program tells the plotting library
 how large we want the figure to be,
 that we're creating four sub-plots, and
 what to draw for each one.
 
-> ## Scientists dislike typing {.callout}
->
-> We will always use the syntax `import numpy` to import NumPy.
-> However, in order to save typing, it is
-> [often suggested](http://www.scipy.org/getting-started.html#an-example-script)
-> to make a shortcut like so: `import numpy as np`.
-> If you ever see Python code online using a NumPy function with `np`
-> (for example, `np.loadtxt(...)`), it's because they've used this shortcut.
-
-> ## Check your understanding {.challenge}
->
-> Draw diagrams showing what variables refer to what values after each statement in the following program:
->
-> ~~~ {.python}
-> mass = 47.5
-> age = 122
-> mass = mass * 2.0
-> age = age - 20
-> ~~~
-
-> ## Sorting out references {.challenge}
->
-> What does the following program print out?
->
-> ~~~ {.python}
-> first, second = 'Grace', 'Hopper'
-> third, fourth = second, first
-> print third, fourth
-> ~~~
-
-> ## Slicing strings {.challenge}
->
-> A section of an array is called a [slice](reference.html#slice).
-> We can take slices of character strings as well:
->
-> ~~~ {.python}
-> element = 'oxygen'
-> print 'first three characters:', element[0:3]
-> print 'last three characters:', element[3:6]
-> ~~~
->
-> ~~~ {.output}
-> first three characters: oxy
-> last three characters: gen
-> ~~~
->
-> What is the value of `element[:4]`?
-> What about `element[4:]`?
-> Or `element[:]`?
->
-> What is `element[-1]`?
-> What is `element[-2]`?
-> Given those answers,
-> explain what `element[1:-1]` does.
-
-
-> ## Make your own plot {.challenge}
->
-> Create a plot showing the maximum (`numpy.max`), minimum (`numpy.min`), and standard deviation (`numpy.std`) of the temperature data for each day across all stations. Make subplots and use the correct `axis=` argument in the function calls.
-
 > ## Moving plots around {.challenge}
 >
 > Modify the program to display the four plots as a 2x2 grid instead of as a stack.
+
+> ## Make your own plot {.challenge}
+>
+> Create a plot (with subplots) showing the maximum (`numpy.max`), minimum (`numpy.min`), and standard deviation (`numpy.std`) of the temperature data for each day across all stations. Remember to use the correct `axis=` argument when calling the methods.

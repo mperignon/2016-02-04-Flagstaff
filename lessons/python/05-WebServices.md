@@ -6,20 +6,17 @@ minutes: 30
 ---
 > ## Learning Objectives {.objectives}
 >
-> *   Explain what a for loop does.
-> *   Correctly write for loops to repeat simple calculations.
-> *   Trace changes to a loop variable as the loop runs.
-> *   Trace changes to other variables as they are updated by a for loop.
+> *   Explain what web services are.
+> *   Build strings to request data through an API.
+> *   Use function arguments to import data into Pandas.
 
+In the previous lesson, we developed a script for loading a csv file with pre-processed streamgage data into Python using the Pandas library, converting column headers and some values into the correct format, plotting the data, and saving the figures to file.
 
-In the previous chapter, we developed a short script for loading some pre-processed streamgage data into Python using the Pandas library, converting some columns into the correct format, plotting the data, and saving the figures to files.
+Our goal is to create a fully automated workflow that can produce plots for multiple stations without requiring any hand processing of the data. In this lesson, we are going to replace the initial import step in our previous code with an automatic request to a server. Instead of downloading a file, we will obtain the data through the USGS web services with a short script.
 
-Our goal is to create a fully automated workflow that can produce plots for multiple stations without requiring any hand processing of the data. In this chapter, we are going to replace the initial import step in our previous code. Instead, we are going to request the data directly through the USGS web services with a short script.
+Web services are automated tools for transfering data directly from machine to machine. The code we write will ask a server for some data and the server will hand a file back to the code. The way that these commands and data are transferred is through an API (Application Programming Interface), which is a set of functions and protocols that make up the dialog of that interaction. We don't actually need to understand in detail what any of this means to use the web services, though - help pages (and trial and error) are our friend!
 
-Web services are automated tools for transfering data directly from machine to machine. Effectively, the code we write will ask a server for some data, and that server will hand it back to your code. The way that these commands and data are transferred is through an API (Application Programming Interface), which is essertially a set of functions and protocols for that interaction. We don't actually need to understand in detail what any of that means to use it, though - help pages are our friend!
-
-Let's start by request data from the streamgage station at Lee's Ferry. We'll make a variable with the station number (which I looked up):
-
+We can start by requesting data for the streamgage station on the Colorado River at Lee's Ferry. Let's make a variable with the station number (which I looked up):
 
 ~~~ {.python}
 station = 09380000
@@ -31,7 +28,7 @@ station = 09380000
 SyntaxError: invalid token
 ~~~
 
-An integer cannot start with a zero, so Python doesn't know what we mean and produces a Syntax Error. Let's rewrite the station number as a string by putting it in quotes (single or double both work):
+An integer cannot start with a zero so Python doesn't know what we mean and returns a Syntax Error. Let's rewrite the station number as a string by putting it in quotes (single or double both work):
 
 ~~~ {.python}
 station = '09380000'
@@ -44,33 +41,27 @@ start_date = '2016-01-01'
 end_date = '2016-01-10'
 ~~~
 
-Data is accesed through APIs using URLs that contain the different pieces of information that the server needs to identify the data that we need. The USGS has a nifty little tool for helping us compose the URL:
+Data is accesed through APIs using URLs that include the different pieces of information the server needs to identify the data that we are requesting. The USGS has a nifty little tool for helping us compose URLs:
 
-http://waterservices.usgs.gov/rest/IV-Test-Tool.html
+[http://waterservices.usgs.gov/rest/IV-Test-Tool.html](http://waterservices.usgs.gov/rest/IV-Test-Tool.html)
 
-Let's use that tool to create the URL for the data we want:
+Let's use that tool to create the URL for the data we want. It should look like this:
 
-http://waterservices.usgs.gov/nwis/iv/?format=rdb&sites=09380000&startDT=2016-01-01&endDT=2016-01-10&parameterCd=00060,00065
+[http://waterservices.usgs.gov/nwis/iv/?format=rdb&sites=09380000&startDT=2016-01-01&endDT=2016-01-10&parameterCd=00060,00065](http://waterservices.usgs.gov/nwis/iv/?format=rdb&sites=09380000&startDT=2016-01-01&endDT=2016-01-10&parameterCd=00060,00065)
 
-If we go to that URL, we could just download that file and process it manually. We don't want to do that.
+If we go to that URL, we could just download the file and process it manually. We don't want to do that.
 
-Let's start by making a variable `url` for the URL of the data we want:
-
-~~~ {.python}
-url = 'http://waterservices.usgs.gov/nwis/iv/?format=rdb&sites=09380000&startDT=2016-01-01&endDT=2016-01-10&parameterCd=00060,00065'
-~~~
-~~~ {.output}
-We previously used the Pandas method `read_csv` to load a comma-delimited file into Python. That method can also receive a URL as the address to the file:
-~~~
+We previously used the Pandas function `read_csv` to load a comma-delimited file into Python. That method can also receive a URL as the address to the file. Let's start by making a variable `url` for the URL of the data we want to request, and then use that variable as a parameter in the function:
 
 ~~~ {.python}
 import pandas as pd
+
+url = 'http://waterservices.usgs.gov/nwis/iv/?format=rdb&sites=09380000&startDT=2016-01-01&endDT=2016-01-10&parameterCd=00060,00065'
 
 pd.read_csv(url)
 ~~~
 ~~~ {.error}
 ---------------------------------------------------------------------------
-
 CParserError                              Traceback (most recent call last)
 
 <ipython-input-5-ab590da0ab09> in <module>()
@@ -129,10 +120,9 @@ pandas/parser.pyx in pandas.parser.raise_parser_error (pandas/parser.c:22649)()
 CParserError: Error tokenizing data. C error: Expected 1 fields in line 12, saw 2
 ~~~
 
-Pandas is unhappy and cannot load our file. The parser, a script responsible for converting the text in the file into a data structure inside Python, expects one line of column titles and then data with the same number of columns. Open the URL in a separate tab in your web browser and examine the file. The header is making it appear like the number of columns is charging part way through the file.
+Pandas is unhappy and cannot load our file! The parser, a script responsible for converting the text in the file into a data structure inside Python, expects one line of column headers and then data with the same number of columns. Open the URL in a separate tab in your web browser and examine the file. The header is making it appear like the number of columns is charging part way through the file. We need to ask Pandas to ignore the header.
 
-The most widely used libraries in Python are very well documented. The help file for the specific function we are trying to use will contain information about the options that might let us read the file while ignoring the header:
-
+Most widenly used libraries in Python are well documented. The help file for the specific function we are trying to use will contain information about the options that might let us read the file while ignoring the header:
 
 ~~~ {.python}
 help(pd.read_csv)
@@ -306,182 +296,29 @@ help(pd.read_csv)
 ~~~    
 
 
-A way to see the documentation as a separate window within an iPython notebook is with a question mark:
+A way to see the documentation as a separate window within an IPython Notebook is with a question mark:
 
 ~~~ {.python}
 pd.read_csv?
 ~~~
 
-The function `read_csv` requires the first parameter (a filepath) and accepts many optional parameters (if not set, they use a default value). For example, `sep=','` is an optional function parameter that defines the column separator. By default, it's a comma.
+From the help files, we can see that the function `read_csv` requires the first parameter (a filepath) and accepts many optional parameters (if they are not set, they use a default value). For example, `sep=','` is an optional function parameter that defines the column separator. By default, it's a comma.
 
-Let's try loading our file again. Because the columns in our file are separated by tabs, we need to set the `sep` parameter. To remove the header, we will also tell Pandas that lines that start with `#` are comments and it should not import them.
-
+Let's try loading our file again. Because the columns in our file are separated by tabs, we need to set the `sep` parameter to `'\t'`. To remove the header, we will also tell Pandas that lines that start with `#` are comments and it should not import them:
 
 ~~~ {.python}
 data = pd.read_csv(url, sep='\t', comment='#')
 data.head()
 ~~~
-~~~ {.output}
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>agency_cd</th>
-      <th>site_no</th>
-      <th>datetime</th>
-      <th>tz_cd</th>
-      <th>01_00060</th>
-      <th>01_00060_cd</th>
-      <th>02_00065</th>
-      <th>02_00065_cd</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>5s</td>
-      <td>15s</td>
-      <td>20d</td>
-      <td>6s</td>
-      <td>14n</td>
-      <td>10s</td>
-      <td>14n</td>
-      <td>10s</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>USGS</td>
-      <td>09380000</td>
-      <td>2016-01-01 00:00</td>
-      <td>MST</td>
-      <td>15200</td>
-      <td>P</td>
-      <td>9.74</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>USGS</td>
-      <td>09380000</td>
-      <td>2016-01-01 00:15</td>
-      <td>MST</td>
-      <td>14900</td>
-      <td>P</td>
-      <td>9.67</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>USGS</td>
-      <td>09380000</td>
-      <td>2016-01-01 00:30</td>
-      <td>MST</td>
-      <td>14600</td>
-      <td>P</td>
-      <td>9.62</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>USGS</td>
-      <td>09380000</td>
-      <td>2016-01-01 00:45</td>
-      <td>MST</td>
-      <td>14200</td>
-      <td>P</td>
-      <td>9.55</td>
-      <td>P</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-~~~
 
-There's our file! Pandas read the first row of the file as the column headers and everything below that as data, but row 0 doesn't belong. We can tell the function `read_csv` to use the second row of the file as the column headers and ignore the first row so at least our data is imported correctly:
+That's the file we want! Pandas read the first row of the file as the column headers and everything below that as data, but row 0 doesn't belong there. There are more elegant ways to solve this, but we can simply tell the function `read_csv` to use the second row of the file as the column headers and ignore the first row so at least our data is imported correctly:
 
 ~~~ {.python}
 data = pd.read_csv(url, header=1, sep='\t', comment='#')
 data.head()
 ~~~
-~~~ {.output}
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>5s</th>
-      <th>15s</th>
-      <th>20d</th>
-      <th>6s</th>
-      <th>14n</th>
-      <th>10s</th>
-      <th>14n.1</th>
-      <th>10s.1</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>USGS</td>
-      <td>9380000</td>
-      <td>2016-01-01 00:00</td>
-      <td>MST</td>
-      <td>15200</td>
-      <td>P</td>
-      <td>9.74</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>USGS</td>
-      <td>9380000</td>
-      <td>2016-01-01 00:15</td>
-      <td>MST</td>
-      <td>14900</td>
-      <td>P</td>
-      <td>9.67</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>USGS</td>
-      <td>9380000</td>
-      <td>2016-01-01 00:30</td>
-      <td>MST</td>
-      <td>14600</td>
-      <td>P</td>
-      <td>9.62</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>USGS</td>
-      <td>9380000</td>
-      <td>2016-01-01 00:45</td>
-      <td>MST</td>
-      <td>14200</td>
-      <td>P</td>
-      <td>9.55</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>USGS</td>
-      <td>9380000</td>
-      <td>2016-01-01 01:00</td>
-      <td>MST</td>
-      <td>14000</td>
-      <td>P</td>
-      <td>9.49</td>
-      <td>P</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-~~~
 
-Of course, the column headers are now wrong! We were planning to rename them, so let's just do that during import:
+Of course, the column headers are now wrong! We were planning to rename them later, so let's just do it during import instead:
 
 ~~~ {.python}
 new_column_names = ['Agency', 'Station', 'OldDateTime', 'Timezone', 'Discharge_cfs', 'Discharge_stat', 'Stage_ft', 'Stage_stat']
@@ -489,93 +326,16 @@ new_column_names = ['Agency', 'Station', 'OldDateTime', 'Timezone', 'Discharge_c
 data = pd.read_csv(url, header=1, sep='\t', comment='#', names = new_column_names)
 data.head()
 ~~~
-~~~ {.output}
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Agency</th>
-      <th>Station</th>
-      <th>OldDateTime</th>
-      <th>Timezone</th>
-      <th>Discharge_cfs</th>
-      <th>Discharge_stat</th>
-      <th>Stage_ft</th>
-      <th>Stage_stat</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>USGS</td>
-      <td>9380000</td>
-      <td>2016-01-01 00:00</td>
-      <td>MST</td>
-      <td>15200</td>
-      <td>P</td>
-      <td>9.74</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>USGS</td>
-      <td>9380000</td>
-      <td>2016-01-01 00:15</td>
-      <td>MST</td>
-      <td>14900</td>
-      <td>P</td>
-      <td>9.67</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>USGS</td>
-      <td>9380000</td>
-      <td>2016-01-01 00:30</td>
-      <td>MST</td>
-      <td>14600</td>
-      <td>P</td>
-      <td>9.62</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>USGS</td>
-      <td>9380000</td>
-      <td>2016-01-01 00:45</td>
-      <td>MST</td>
-      <td>14200</td>
-      <td>P</td>
-      <td>9.55</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>USGS</td>
-      <td>9380000</td>
-      <td>2016-01-01 01:00</td>
-      <td>MST</td>
-      <td>14000</td>
-      <td>P</td>
-      <td>9.49</td>
-      <td>P</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-~~~
-
 
 > ## Why not just delete the bad row? {.callout}
 > 
-> In the previous lesson, we saw we could create new DataFrames that contained just a subset of the rows of an existing DataFrame. Why did we go through so much trouble to avoid importing the "bad" row in with the data?
+> In the previous lesson, we saw we could create new DataFrames that contained just a subset of the rows of an existing DataFrame. Why did we go through so much trouble to avoid importing the "bad" row?
 > 
-> One consideration is memory space and speed. If we had simply copied the good rows into a new DataFrame, Python would have created a new copy of the data, occupying available memory and taking some time. While the extra computational expenses are negligible for these small datasets, they quickly add up! By fixing those issues as we are importing the data, we create only one copy of the DataFrame from the start.
+> One consideration is memory space and computational speed. If we had simply copied the good rows into a new DataFrame, Python would have had to create a new copy of all of the data (minus that row), occupying available memory and taking some time. While the extra computational expenses are negligible for these small datasets, they will quickly add up!.
 > 
-> The second concern is less obvious but could potentially complicate how we handle the data later on. Each column in the DataFrame has a data type that restricts what can be done with the data (check them with `data.dtypes`). Columns of the type `object`, for example, contain strings and cannot be used in mathematical expressions. When the "bad" row was included in the data, the first entry in the columns for stage and discharge were "14n", forcing Pandas to consider every entry in those columns to be a string instead of an integer or float.
+> The second concern is less obvious but would complicate how we handle the data later on. Each column in the DataFrame has a data type (check them with `data.dtypes`). Columns of the type `object`, for example, contain strings and cannot be used in mathematical expressions. When the "bad" row was included in the data, the first entry in the columns for stage and discharge were "14n" instead of a number, forcing Pandas to consider every entry in those two columns to be a string instead of an integer or float.
 
-Our script can now import data through the USGS web services in a format that we can use with our existing code! Let's combine these commands with the code we wrote in the previous lesson. We can copy the old code, comment out (with the symbol #) any rows that we don't want to use, and add our new commands:
+Our script can now import data through the USGS web services and produce an object that can be used with the code we wrote before. Let's combine these commands with the existing code and [comment](reference.html#comment) (with the symbol #) any rows that we don't need anymore:
 
 ~~~ {.python}
 import pandas as pd

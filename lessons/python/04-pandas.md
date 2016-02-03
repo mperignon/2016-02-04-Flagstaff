@@ -6,36 +6,38 @@ minutes: 30
 ---
 > ## Learning Objectives {.objectives}
 >
-> *   Explain what a for loop does.
-> *   Correctly write for loops to repeat simple calculations.
-> *   Trace changes to a loop variable as the loop runs.
-> *   Trace changes to other variables as they are updated by a for loop.
+> *   Use Pandas to import csv files.
+> *   Access columns within DataFrames.
+> *   Modify DataFrame column names and values.
+> *   Slice DataFrames.
+> *   Plot using Pandas and save plots to file.
 
+At this point, this set of lessons diverges from the usual material included in the Software Carpentry novice Python lessons. The topics we cover are geared towards processing and analyzing scientific data, and handling the complexities that come with pulling data directly from real sources.
 
-Since by now you have all written some Python code that works, we are going to jump directly into doing some science tasks with data pulled directly from real sources, instead of using a dataset we cleaned for you.
+We would like to create a script that visualizes the streamgage data from the Colorado River over a specified period of time at different points along its course.
 
-Some of the stuff we are going to do will be fairly advanced but I think that seeing how the language can automate your workflow - and especially how it can handle the tasks that are annoying or difficult - will make it more likely that you'll come back to it. We are throwing a lot at you, so put a red sticky up if you need hands-on help and interrupt if you have a question, and we'll adjust as we go.
+Traditionally, we would access the data through the [USGS website](http://waterwatch.usgs.gov/?m=real&r=az), clicking around, dowloading the file, and cleaning it up by hand. The csv file would look like this:
 
-We are interested in the comparing the discharge over a specific time period at different points along the Colorado River. The traditional way to do this is through the USGS website:
+[http://waterdata.usgs.gov/az/nwis/uv?cb_00060=on&cb_00065=on&format=rdb&site_no=09380000&period=&begin_date=2016-01-01&end_date=2016-01-10](http://waterdata.usgs.gov/az/nwis/uv?cb_00060=on&cb_00065=on&format=rdb&site_no=09380000&period=&begin_date=2016-01-01&end_date=2016-01-10)
 
-http://waterwatch.usgs.gov/?m=real&r=az
+Instead of cleaning up these files this by hand, we are going to automate the entire process of data import and processing using Python. While manually extracting the data from one file would not take long, repeating the process frequently or with a large number of files would likely lead to errors.
 
-and then precisely selecting the station you want and going through the whole process by hand. At the end, you have end up with some csv files that look like this:
+Our code should:
 
-http://waterdata.usgs.gov/az/nwis/uv?cb_00060=on&cb_00065=on&format=rdb&site_no=09380000&period=&begin_date=2016-01-01&end_date=2016-01-10
+* Take a list of USGS stations, a start date and an end date as input.
+* Create plots of the gage height and discharge for each station on the list as output, and save them to individual files.
 
-The header is annoying because it doesn't always have the same number of lines. Depending on the specific options we selected, the table has a different number of columns. Automating the analysis of these files is rough, and it requires quite a bit of handholding in Excel. If we were to do this frequently or for many stations, the chances of introducing an error are high.
+We will build this script by breaking it up into small tasks, gradually add complexity to our solution, and combine the pieces of code into a single program.
 
-Instead of doing this by hand, we are going to automate the entire process of data import and processing using Python. We will write a script that will take two dates and a list of stations and will automatically create plots of the gage height and discharge for each of those stations.
+## Using Pandas for tabular data
 
-Earlier today we used a Python library called numpy to handle arrays of data. `numpy arrays` are matrices and are great for doing calculations on data, but they can only contain floats or integers. Tabular data are best handled by spreadsheets where entries such as dates and times are in some useful format.
+In a previous lesson we used a Python library called NumPy to handle arrays of data. NumPy arrays are perfect for doing calculations with our data, but they can only handle floats or integers. Tabular data more closely resembles spreadsheets, where entries such as dates and times are in some useful format.
 
-One of the best options for working with tabular data in Python is the Python Data Analysis Library (a.k.a. Pandas). The Pandas library provides data structures, produces high quality plots with matplotlib (the plotting library we used earlier) and integrates nicely with other libraries that can use numpy arrays.
+One of the best options for working with tabular data in Python is the Python Data Analysis Library (a.k.a. Pandas). The Pandas library provides its own set of data structures, produces high quality plots through Matplotlib (the plotting library we used earlier), and integrates nicely with other libraries that can use NumPy arrays.
 
-Let's start by importing streamgage data from a file that has already been partially cleaned up. Open the file in a text editor and see: we removed the header and the column format line ("5d 15s..."), and saved it as a comma-delimited file instead of tab delimited.
+Let's start by importing streamgage data from a file that has already been partially cleaned up. Compare the URL in the introduction with the file we provided: we removed the file header and the column format line ("5d 15s..."), and saved the file as a comma-delimited file instead of tab delimited.
 
-We will first import the Pandas library and give it the shortcut `pd` and use the Pandas function `read_csv` to import the file. This will pull the contents of the file into a DataFrame. Let's assign it to a variable named `data` (so original!) and print the first 5 lines:
-
+First, we import the Pandas library and give it the shortcut `pd`. We can use the Pandas function `read_csv` to import the file and assign them to a variable named `data`. This will pull the contents of the file into a DataFrame. We can then print the first 5 lines of the DataFrame using the method `head()`:
 
 ~~~ {.python}
 import pandas as pd
@@ -43,99 +45,21 @@ import pandas as pd
 data = pd.read_csv('data/streamgage.csv')
 data.head()
 ~~~
-~~~ {.output}
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>agency_cd</th>
-      <th>site_no</th>
-      <th>datetime</th>
-      <th>tz_cd</th>
-      <th>01_00060</th>
-      <th>01_00060_cd</th>
-      <th>02_00065</th>
-      <th>02_00065_cd</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>USGS</td>
-      <td>9163500</td>
-      <td>1/1/16 0:00</td>
-      <td>MST</td>
-      <td>3510</td>
-      <td>P</td>
-      <td>3.78</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>USGS</td>
-      <td>9163500</td>
-      <td>1/1/16 0:15</td>
-      <td>MST</td>
-      <td>3510</td>
-      <td>P</td>
-      <td>3.78</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>USGS</td>
-      <td>9163500</td>
-      <td>1/1/16 0:30</td>
-      <td>MST</td>
-      <td>3490</td>
-      <td>P</td>
-      <td>3.77</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>USGS</td>
-      <td>9163500</td>
-      <td>1/1/16 0:45</td>
-      <td>MST</td>
-      <td>3490</td>
-      <td>P</td>
-      <td>3.77</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>USGS</td>
-      <td>9163500</td>
-      <td>1/1/16 1:00</td>
-      <td>MST</td>
-      <td>3470</td>
-      <td>P</td>
-      <td>3.76</td>
-      <td>P</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-~~~
-
 
 > ## What's a DataFrame? {.callout}
 > 
 > A DataFrame is a 2-dimensional data structure that can store data of different types (including characters, integers, floating point values, factors and more) in columns. It is similar to a spreadsheet or an SQL table or the data.frame in R.
 > 
 > Check the data type of `data` using the `type` method. The `type` method and `__class__` attribute tell us what type of object the variable points to. We will not discuss the full meaning of this terminology, related to object-oriented programming, in the workshop.
-
-
-~~~ {.python}
-print type(data)
-print data.__class__
-~~~
-~~~ {.output}
-<class 'pandas.core.frame.DataFrame'>
-<class 'pandas.core.frame.DataFrame'>
-~~~
+> 
+> ~~~ {.python}
+> print type(data)
+> print data.__class__
+> ~~~
+> ~~~ {.output}
+> <class 'pandas.core.frame.DataFrame'>
+> <class 'pandas.core.frame.DataFrame'>
+> ~~~
 
 Each column in a DataFrame also has a type. We can use `data.dtypes` to view the data type for each column. `int64` represents numeric integer values - `int64` cells can not store decimals. `object` represents strings (letters and numbers). `float64` represents numbers with decimals.
 
@@ -160,7 +84,7 @@ We need to give the DataFrame column names that are easier to read. Let's create
 new_column_names = ['Agency', 'Station', 'OldDateTime', 'Timezone', 'Discharge_cfs', 'Discharge_stat', 'Stage_ft', 'Stage_stat']
 ~~~
 
-We can see the column names of a DataFrame using the method `columns`, and we can use that same method to assign it the new column names:
+We can see the column names of a DataFrame using the method `columns`, and we can use that same method to give the DataFrame the new column names:
 
 ~~~ {.python}
 print 'Old column names:', data.columns
@@ -178,153 +102,23 @@ New column names: Index([u'Agency', u'Station', u'OldDateTime', u'Timezone', u'D
       dtype='object')
 ~~~
 
-~~~ {.python}
-data.head()
-~~~
-~~~ {.output}
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Agency</th>
-      <th>Station</th>
-      <th>OldDateTime</th>
-      <th>Timezone</th>
-      <th>Discharge_cfs</th>
-      <th>Discharge_stat</th>
-      <th>Stage_ft</th>
-      <th>Stage_stat</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>USGS</td>
-      <td>9163500</td>
-      <td>1/1/16 0:00</td>
-      <td>MST</td>
-      <td>3510</td>
-      <td>P</td>
-      <td>3.78</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>USGS</td>
-      <td>9163500</td>
-      <td>1/1/16 0:15</td>
-      <td>MST</td>
-      <td>3510</td>
-      <td>P</td>
-      <td>3.78</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>USGS</td>
-      <td>9163500</td>
-      <td>1/1/16 0:30</td>
-      <td>MST</td>
-      <td>3490</td>
-      <td>P</td>
-      <td>3.77</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>USGS</td>
-      <td>9163500</td>
-      <td>1/1/16 0:45</td>
-      <td>MST</td>
-      <td>3490</td>
-      <td>P</td>
-      <td>3.77</td>
-      <td>P</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>USGS</td>
-      <td>9163500</td>
-      <td>1/1/16 1:00</td>
-      <td>MST</td>
-      <td>3470</td>
-      <td>P</td>
-      <td>3.76</td>
-      <td>P</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-~~~
-
-
 The values in each column of a Pandas DataFrame can be accessed using the column name. If we want to access more than one column at once, we use a list of column names:
 
 ~~~ {.python}
 data[['Discharge_cfs','Stage_ft']].head()
-~~~
-~~~ {.output}
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Discharge_cfs</th>
-      <th>Stage_ft</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>3510</td>
-      <td>3.78</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>3510</td>
-      <td>3.78</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>3490</td>
-      <td>3.77</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>3490</td>
-      <td>3.77</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>3470</td>
-      <td>3.76</td>
-    </tr>
-  </tbody>
-</table>
-</div>
 ~~~
 
 We can also create new columns using this syntax:
 
 ~~~ {.python}
 data['Stage_m'] = data['Stage_ft'] * 0.3048
-data['Stage_m'].head()
-~~~
-~~~ {.output}
-0    1.152144
-1    1.152144
-2    1.149096
-3    1.149096
-4    1.146048
-Name: Stage_m, dtype: float64
 ~~~
 
-## Fixing the station name
+### Fixing the station name
 
-When Pandas imported the data, it read the station name as an integer and removed the initial zero. We can fix the station name by replacing the values of that column.
+When Pandas imported the data, it read the station name as an integer and removed the initial zero. We can fix the station name by replacing the values of that column with a string.
 
-Remember that we are doing all of this so we can later automate the process for multiple stations. Instead of writing the corrected station name ourselves, let's build it from the values available in the DataFrame:
+Remember that we are doing all of this so we can later automate the process for multiple stations. Instead of writing the correct station name ourselves, let's build it from the values available in the DataFrame:
 
 ~~~ {.python}
 data['Station'].unique()
@@ -333,7 +127,7 @@ data['Station'].unique()
 array([9163500])
 ~~~
 
-The Pandas method `unique` returns a `numpy` array of the unique elements in the DataFrame. We want the first (and only) entry to that array, which has the index 0. We can build a string with the correct station name by **casting** that integer as a string and concatenating with an initial zero:
+The Pandas method `unique` returns a NumPy array of the unique elements in the Stations column of the DataFrame. We want the first (and only) entry to that array, which has the index 0. We can build a string with the correct station name by **casting** the integer as a string and concatenating it with an initial zero (also as a string):
 
 ~~~ {.python}
 new_station_name = "0" + str(data['Station'].unique()[0])
@@ -343,96 +137,10 @@ print new_station_name
 09163500
 ~~~
 
-We can replace all values in the 'Station' column with this string by assignment, and we can check the object type of each column to make sure it is no longer an integer:
+We can replace all values in the 'Station' column with this string through assignment, and we can check the object type of each column to make sure it is no longer an integer:
 
 ~~~ {.python}
 data['Station'] = new_station_name
-data.head()
-~~~
-~~~ {.output}
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Agency</th>
-      <th>Station</th>
-      <th>OldDateTime</th>
-      <th>Timezone</th>
-      <th>Discharge_cfs</th>
-      <th>Discharge_stat</th>
-      <th>Stage_ft</th>
-      <th>Stage_stat</th>
-      <th>Stage_m</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:00</td>
-      <td>MST</td>
-      <td>3510</td>
-      <td>P</td>
-      <td>3.78</td>
-      <td>P</td>
-      <td>1.152144</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:15</td>
-      <td>MST</td>
-      <td>3510</td>
-      <td>P</td>
-      <td>3.78</td>
-      <td>P</td>
-      <td>1.152144</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:30</td>
-      <td>MST</td>
-      <td>3490</td>
-      <td>P</td>
-      <td>3.77</td>
-      <td>P</td>
-      <td>1.149096</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:45</td>
-      <td>MST</td>
-      <td>3490</td>
-      <td>P</td>
-      <td>3.77</td>
-      <td>P</td>
-      <td>1.149096</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 1:00</td>
-      <td>MST</td>
-      <td>3470</td>
-      <td>P</td>
-      <td>3.76</td>
-      <td>P</td>
-      <td>1.146048</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-~~~
-
-~~~ {.python}
 data.dtypes
 ~~~
 ~~~ {.output}
@@ -448,8 +156,7 @@ Stage_m           float64
 dtype: object
 ~~~
 
-
-## Handling date and time stamps
+### Handling date and time stamps
 
 Different programming languages and software packages handle date and time stamps in their own unique and obscure ways. Pandas has a set of functions for creating and managing timeseries that is well described in the documentation.
 
@@ -457,183 +164,19 @@ We need to convert the entries in the DateTime column into a format that Pandas 
 
 ~~~ {.python}
 data['DateTime'] = pd.to_datetime(data['OldDateTime'])
-data.head()
-~~~
-~~~ {.output}
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Agency</th>
-      <th>Station</th>
-      <th>OldDateTime</th>
-      <th>Timezone</th>
-      <th>Discharge_cfs</th>
-      <th>Discharge_stat</th>
-      <th>Stage_ft</th>
-      <th>Stage_stat</th>
-      <th>Stage_m</th>
-      <th>DateTime</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:00</td>
-      <td>MST</td>
-      <td>3510</td>
-      <td>P</td>
-      <td>3.78</td>
-      <td>P</td>
-      <td>1.152144</td>
-      <td>2016-01-01 00:00:00</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:15</td>
-      <td>MST</td>
-      <td>3510</td>
-      <td>P</td>
-      <td>3.78</td>
-      <td>P</td>
-      <td>1.152144</td>
-      <td>2016-01-01 00:15:00</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:30</td>
-      <td>MST</td>
-      <td>3490</td>
-      <td>P</td>
-      <td>3.77</td>
-      <td>P</td>
-      <td>1.149096</td>
-      <td>2016-01-01 00:30:00</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:45</td>
-      <td>MST</td>
-      <td>3490</td>
-      <td>P</td>
-      <td>3.77</td>
-      <td>P</td>
-      <td>1.149096</td>
-      <td>2016-01-01 00:45:00</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 1:00</td>
-      <td>MST</td>
-      <td>3470</td>
-      <td>P</td>
-      <td>3.76</td>
-      <td>P</td>
-      <td>1.146048</td>
-      <td>2016-01-01 01:00:00</td>
-    </tr>
-  </tbody>
-</table>
-</div>
 ~~~
 
-## Data subsets and removing columns
+### Subsetting data and removing columns
 
-The entries in our DataFrame `data` are indexed by the number in **bold** on the left side of the row. We can display a slice of the data using index ranges:
+The entries in our DataFrame `data` are indexed by the number in **bold** on the left side of the row. We can display a slice of the data using index ranges just as we did with NumPy arrays:
 
 ~~~ {.python}
 data[0:4]
 ~~~
-~~~ {.output}
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Agency</th>
-      <th>Station</th>
-      <th>OldDateTime</th>
-      <th>Timezone</th>
-      <th>Discharge_cfs</th>
-      <th>Discharge_stat</th>
-      <th>Stage_ft</th>
-      <th>Stage_stat</th>
-      <th>Stage_m</th>
-      <th>DateTime</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:00</td>
-      <td>MST</td>
-      <td>3510</td>
-      <td>P</td>
-      <td>3.78</td>
-      <td>P</td>
-      <td>1.152144</td>
-      <td>2016-01-01 00:00:00</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:15</td>
-      <td>MST</td>
-      <td>3510</td>
-      <td>P</td>
-      <td>3.78</td>
-      <td>P</td>
-      <td>1.152144</td>
-      <td>2016-01-01 00:15:00</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:30</td>
-      <td>MST</td>
-      <td>3490</td>
-      <td>P</td>
-      <td>3.77</td>
-      <td>P</td>
-      <td>1.149096</td>
-      <td>2016-01-01 00:30:00</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>USGS</td>
-      <td>09163500</td>
-      <td>1/1/16 0:45</td>
-      <td>MST</td>
-      <td>3490</td>
-      <td>P</td>
-      <td>3.77</td>
-      <td>P</td>
-      <td>1.149096</td>
-      <td>2016-01-01 00:45:00</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-~~~
 
 > ## `loc` or `iloc`? {.callout}
 > 
-> Accessing individual rows or subsets of both rows and columns is a bit more obscure. We can select specific ranges of our data in both the row and column directions using either label or integer-based indexing.
+> Accessing individual rows or subsets of both rows and columns in Pandas is a bit more complicated. We can select specific ranges of our data in both the row and column directions using either label or integer-based indexing.
 > 
 > - `loc`: indexing via labels or integers
 > - `iloc`: indexing via integers
@@ -644,70 +187,14 @@ data[0:4]
 > ~~~ {.python}
 > data.iloc[0:2,-2:]
 > ~~~
-> ~~~ {.output}
-> <div>
-> <table border="1" class="dataframe">
->   <thead>
->     <tr style="text-align: right;">
->       <th></th>
->       <th>Stage_m</th>
->       <th>DateTime</th>
->     </tr>
->   </thead>
->   <tbody>
->     <tr>
->       <th>0</th>
->       <td>1.152144</td>
->       <td>2016-01-01 00:00:00</td>
->     </tr>
->     <tr>
->       <th>1</th>
->       <td>1.152144</td>
->       <td>2016-01-01 00:15:00</td>
->     </tr>
->   </tbody>
-> </table>
-> </div>
-> ~~~
-> 
+>
 > Or the `loc` method, using integer indices for rows and labels for columns:
 > 
 > ~~~ {.python}
 > data.loc[0:2, ['DateTime', 'Stage_m']]
 > ~~~
-> ~~~ {.output}
-> <div>
-> <table border="1" class="dataframe">
->   <thead>
->     <tr style="text-align: right;">
->       <th></th>
->       <th>DateTime</th>
->       <th>Stage_m</th>
->     </tr>
->   </thead>
->   <tbody>
->     <tr>
->       <th>0</th>
->       <td>2016-01-01 00:00:00</td>
->       <td>1.152144</td>
->     </tr>
->     <tr>
->       <th>1</th>
->       <td>2016-01-01 00:15:00</td>
->       <td>1.152144</td>
->     </tr>
->     <tr>
->       <th>2</th>
->       <td>2016-01-01 00:30:00</td>
->       <td>1.149096</td>
->     </tr>
->   </tbody>
-> </table>
-> </div>
-> ~~~
 > 
-> 
-> The number of rows that these two commands return is different! The method `iloc` behaves like other sequences in Python, ignoring the end bound. With `loc`, however, the start and end bounds of the row indices are included. Compare them using the `shape` method:
+> The number of rows that these two commands return is different! The method `iloc` behaves like indexing in other sequences in Python, ignoring the end bound. With `loc`, however, the start and end bounds of the row indices are included. Compare them using the `shape` method:
 > 
 > ~~~ {.python}
 > print 'With iloc:', data.iloc[0:2,-2:].shape
@@ -720,68 +207,13 @@ data[0:4]
 
 Since we can call individual columns (or lists of columns) from a DataFrame, the simplest way to remove columns is by creating new DataFrames with only the columns we want:
 
-
 ~~~ {.python}
 clean_data = data[['Station', 'DateTime', 'Discharge_cfs', 'Stage_ft']]
-clean_data.head()
-~~~
-~~~ {.output}
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Station</th>
-      <th>DateTime</th>
-      <th>Discharge_cfs</th>
-      <th>Stage_ft</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>09163500</td>
-      <td>2016-01-01 00:00:00</td>
-      <td>3510</td>
-      <td>3.78</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>09163500</td>
-      <td>2016-01-01 00:15:00</td>
-      <td>3510</td>
-      <td>3.78</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>09163500</td>
-      <td>2016-01-01 00:30:00</td>
-      <td>3490</td>
-      <td>3.77</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>09163500</td>
-      <td>2016-01-01 00:45:00</td>
-      <td>3490</td>
-      <td>3.77</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>09163500</td>
-      <td>2016-01-01 01:00:00</td>
-      <td>3470</td>
-      <td>3.76</td>
-    </tr>
-  </tbody>
-</table>
-</div>
 ~~~
 
-## Plotting stage and discharge
+### Plotting stage and discharge
 
-Pandas is well integrated with the `matplotlib` library that we used ealier in the tutorial. We can use the same functions we used before with `numpy` arrays, or we can use the plotting functions built into Pandas:
-
+Pandas is well integrated with the Matplotlib library that we used ealier to create plots. We can use the same functions we used before with NumPy arrays or we can use the plotting functions built into Pandas:
 
 ~~~ {.python}
 import matplotlib.pyplot as plt
@@ -817,10 +249,9 @@ plt.savefig('data/discharge_' + data['Station'][0] + '.png')
 <matplotlib.figure.Figure at 0x10b205890>
 ~~~
 
+### Putting it all together
 
-## Putting it all together
-
-Let's go back through the code we've written and put together just the commands we need to import data and make a plot of discharge.
+Let's go back through the code we've written and put together the commands we need to import data and make a plot of discharge:
 
 ~~~ {.python}
 import pandas as pd

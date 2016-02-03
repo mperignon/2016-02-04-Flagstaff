@@ -34,40 +34,38 @@
 </div>
 <div class="panel-body">
 <ul>
-<li>Explain what a for loop does.</li>
-<li>Correctly write for loops to repeat simple calculations.</li>
-<li>Trace changes to a loop variable as the loop runs.</li>
-<li>Trace changes to other variables as they are updated by a for loop.</li>
+<li>Explain what web services are.</li>
+<li>Build strings to request data through an API.</li>
+<li>Use function arguments to import data into Pandas.</li>
 </ul>
 </div>
 </section>
-<p>In the previous chapter, we developed a short script for loading some pre-processed streamgage data into Python using the Pandas library, converting some columns into the correct format, plotting the data, and saving the figures to files.</p>
-<p>Our goal is to create a fully automated workflow that can produce plots for multiple stations without requiring any hand processing of the data. In this chapter, we are going to replace the initial import step in our previous code. Instead, we are going to request the data directly through the USGS web services with a short script.</p>
-<p>Web services are automated tools for transfering data directly from machine to machine. Effectively, the code we write will ask a server for some data, and that server will hand it back to your code. The way that these commands and data are transferred is through an API (Application Programming Interface), which is essertially a set of functions and protocols for that interaction. We don’t actually need to understand in detail what any of that means to use it, though - help pages are our friend!</p>
-<p>Let’s start by request data from the streamgage station at Lee’s Ferry. We’ll make a variable with the station number (which I looked up):</p>
+<p>In the previous lesson, we developed a script for loading a csv file with pre-processed streamgage data into Python using the Pandas library, converting column headers and some values into the correct format, plotting the data, and saving the figures to file.</p>
+<p>Our goal is to create a fully automated workflow that can produce plots for multiple stations without requiring any hand processing of the data. In this lesson, we are going to replace the initial import step in our previous code with an automatic request to a server. Instead of downloading a file, we will obtain the data through the USGS web services with a short script.</p>
+<p>Web services are automated tools for transfering data directly from machine to machine. The code we write will ask a server for some data and the server will hand a file back to the code. The way that these commands and data are transferred is through an API (Application Programming Interface), which is a set of functions and protocols that make up the dialog of that interaction. We don’t actually need to understand in detail what any of this means to use the web services, though - help pages (and trial and error) are our friend!</p>
+<p>We can start by requesting data for the streamgage station on the Colorado River at Lee’s Ferry. Let’s make a variable with the station number (which I looked up):</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">station <span class="op">=</span> <span class="dv">09380000</span></code></pre></div>
 <pre class="error"><code>  File &quot;&lt;ipython-input-1-6f8681f3257f&gt;&quot;, line 1
     station = 09380000
                      ^
 SyntaxError: invalid token</code></pre>
-<p>An integer cannot start with a zero, so Python doesn’t know what we mean and produces a Syntax Error. Let’s rewrite the station number as a string by putting it in quotes (single or double both work):</p>
+<p>An integer cannot start with a zero so Python doesn’t know what we mean and returns a Syntax Error. Let’s rewrite the station number as a string by putting it in quotes (single or double both work):</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">station <span class="op">=</span> <span class="st">&#39;09380000&#39;</span></code></pre></div>
 <p>We are interested in data between two specific dates:</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">start_date <span class="op">=</span> <span class="st">&#39;2016-01-01&#39;</span>
 end_date <span class="op">=</span> <span class="st">&#39;2016-01-10&#39;</span></code></pre></div>
-<p>Data is accesed through APIs using URLs that contain the different pieces of information that the server needs to identify the data that we need. The USGS has a nifty little tool for helping us compose the URL:</p>
-<p>http://waterservices.usgs.gov/rest/IV-Test-Tool.html</p>
-<p>Let’s use that tool to create the URL for the data we want:</p>
-<p>http://waterservices.usgs.gov/nwis/iv/?format=rdb&amp;sites=09380000&amp;startDT=2016-01-01&amp;endDT=2016-01-10&amp;parameterCd=00060,00065</p>
-<p>If we go to that URL, we could just download that file and process it manually. We don’t want to do that.</p>
-<p>Let’s start by making a variable <code>url</code> for the URL of the data we want:</p>
-<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">url <span class="op">=</span> <span class="st">&#39;http://waterservices.usgs.gov/nwis/iv/?format=rdb&amp;sites=09380000&amp;startDT=2016-01-01&amp;endDT=2016-01-10&amp;parameterCd=00060,00065&#39;</span></code></pre></div>
-<pre class="output"><code>We previously used the Pandas method `read_csv` to load a comma-delimited file into Python. That method can also receive a URL as the address to the file:</code></pre>
+<p>Data is accesed through APIs using URLs that include the different pieces of information the server needs to identify the data that we are requesting. The USGS has a nifty little tool for helping us compose URLs:</p>
+<p><a href="http://waterservices.usgs.gov/rest/IV-Test-Tool.html" class="uri">http://waterservices.usgs.gov/rest/IV-Test-Tool.html</a></p>
+<p>Let’s use that tool to create the URL for the data we want. It should look like this:</p>
+<p><a href="http://waterservices.usgs.gov/nwis/iv/?format=rdb&amp;sites=09380000&amp;startDT=2016-01-01&amp;endDT=2016-01-10&amp;parameterCd=00060,00065" class="uri">http://waterservices.usgs.gov/nwis/iv/?format=rdb&amp;sites=09380000&amp;startDT=2016-01-01&amp;endDT=2016-01-10&amp;parameterCd=00060,00065</a></p>
+<p>If we go to that URL, we could just download the file and process it manually. We don’t want to do that.</p>
+<p>We previously used the Pandas function <code>read_csv</code> to load a comma-delimited file into Python. That method can also receive a URL as the address to the file. Let’s start by making a variable <code>url</code> for the URL of the data we want to request, and then use that variable as a parameter in the function:</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> pandas <span class="im">as</span> pd
+
+url <span class="op">=</span> <span class="st">&#39;http://waterservices.usgs.gov/nwis/iv/?format=rdb&amp;sites=09380000&amp;startDT=2016-01-01&amp;endDT=2016-01-10&amp;parameterCd=00060,00065&#39;</span>
 
 pd.read_csv(url)</code></pre></div>
 <pre class="error"><code>---------------------------------------------------------------------------
-
 CParserError                              Traceback (most recent call last)
 
 &lt;ipython-input-5-ab590da0ab09&gt; in &lt;module&gt;()
@@ -124,8 +122,8 @@ pandas/parser.pyx in pandas.parser.raise_parser_error (pandas/parser.c:22649)()
 
 
 CParserError: Error tokenizing data. C error: Expected 1 fields in line 12, saw 2</code></pre>
-<p>Pandas is unhappy and cannot load our file. The parser, a script responsible for converting the text in the file into a data structure inside Python, expects one line of column titles and then data with the same number of columns. Open the URL in a separate tab in your web browser and examine the file. The header is making it appear like the number of columns is charging part way through the file.</p>
-<p>The most widely used libraries in Python are very well documented. The help file for the specific function we are trying to use will contain information about the options that might let us read the file while ignoring the header:</p>
+<p>Pandas is unhappy and cannot load our file! The parser, a script responsible for converting the text in the file into a data structure inside Python, expects one line of column headers and then data with the same number of columns. Open the URL in a separate tab in your web browser and examine the file. The header is making it appear like the number of columns is charging part way through the file. We need to ask Pandas to ignore the header.</p>
+<p>Most widenly used libraries in Python are well documented. The help file for the specific function we are trying to use will contain information about the options that might let us read the file while ignoring the header:</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="bu">help</span>(pd.read_csv)</code></pre></div>
 <pre class="output"><code>    Help on function read_csv in module pandas.io.parsers:
     
@@ -292,253 +290,31 @@ CParserError: Error tokenizing data. C error: Expected 1 fields in line 12, saw 
         Returns
         -------
         result : DataFrame or TextParser</code></pre>
-<p>A way to see the documentation as a separate window within an iPython notebook is with a question mark:</p>
+<p>A way to see the documentation as a separate window within an IPython Notebook is with a question mark:</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">pd.read_csv?</code></pre></div>
-<p>The function <code>read_csv</code> requires the first parameter (a filepath) and accepts many optional parameters (if not set, they use a default value). For example, <code>sep=','</code> is an optional function parameter that defines the column separator. By default, it’s a comma.</p>
-<p>Let’s try loading our file again. Because the columns in our file are separated by tabs, we need to set the <code>sep</code> parameter. To remove the header, we will also tell Pandas that lines that start with <code>#</code> are comments and it should not import them.</p>
+<p>From the help files, we can see that the function <code>read_csv</code> requires the first parameter (a filepath) and accepts many optional parameters (if they are not set, they use a default value). For example, <code>sep=','</code> is an optional function parameter that defines the column separator. By default, it’s a comma.</p>
+<p>Let’s try loading our file again. Because the columns in our file are separated by tabs, we need to set the <code>sep</code> parameter to <code>'\t'</code>. To remove the header, we will also tell Pandas that lines that start with <code>#</code> are comments and it should not import them:</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data <span class="op">=</span> pd.read_csv(url, sep<span class="op">=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>, comment<span class="op">=</span><span class="st">&#39;#&#39;</span>)
 data.head()</code></pre></div>
-<pre class="output"><code>&lt;div&gt;
-&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
-  &lt;thead&gt;
-    &lt;tr style=&quot;text-align: right;&quot;&gt;
-      &lt;th&gt;&lt;/th&gt;
-      &lt;th&gt;agency_cd&lt;/th&gt;
-      &lt;th&gt;site_no&lt;/th&gt;
-      &lt;th&gt;datetime&lt;/th&gt;
-      &lt;th&gt;tz_cd&lt;/th&gt;
-      &lt;th&gt;01_00060&lt;/th&gt;
-      &lt;th&gt;01_00060_cd&lt;/th&gt;
-      &lt;th&gt;02_00065&lt;/th&gt;
-      &lt;th&gt;02_00065_cd&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;th&gt;0&lt;/th&gt;
-      &lt;td&gt;5s&lt;/td&gt;
-      &lt;td&gt;15s&lt;/td&gt;
-      &lt;td&gt;20d&lt;/td&gt;
-      &lt;td&gt;6s&lt;/td&gt;
-      &lt;td&gt;14n&lt;/td&gt;
-      &lt;td&gt;10s&lt;/td&gt;
-      &lt;td&gt;14n&lt;/td&gt;
-      &lt;td&gt;10s&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;1&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;09380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:00&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;15200&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.74&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;2&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;09380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:15&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;14900&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.67&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;3&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;09380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:30&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;14600&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.62&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;4&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;09380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:45&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;14200&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.55&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;/div&gt;</code></pre>
-<p>There’s our file! Pandas read the first row of the file as the column headers and everything below that as data, but row 0 doesn’t belong. We can tell the function <code>read_csv</code> to use the second row of the file as the column headers and ignore the first row so at least our data is imported correctly:</p>
+<p>That’s the file we want! Pandas read the first row of the file as the column headers and everything below that as data, but row 0 doesn’t belong there. There are more elegant ways to solve this, but we can simply tell the function <code>read_csv</code> to use the second row of the file as the column headers and ignore the first row so at least our data is imported correctly:</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data <span class="op">=</span> pd.read_csv(url, header<span class="op">=</span><span class="dv">1</span>, sep<span class="op">=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>, comment<span class="op">=</span><span class="st">&#39;#&#39;</span>)
 data.head()</code></pre></div>
-<pre class="output"><code>&lt;div&gt;
-&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
-  &lt;thead&gt;
-    &lt;tr style=&quot;text-align: right;&quot;&gt;
-      &lt;th&gt;&lt;/th&gt;
-      &lt;th&gt;5s&lt;/th&gt;
-      &lt;th&gt;15s&lt;/th&gt;
-      &lt;th&gt;20d&lt;/th&gt;
-      &lt;th&gt;6s&lt;/th&gt;
-      &lt;th&gt;14n&lt;/th&gt;
-      &lt;th&gt;10s&lt;/th&gt;
-      &lt;th&gt;14n.1&lt;/th&gt;
-      &lt;th&gt;10s.1&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;th&gt;0&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;9380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:00&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;15200&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.74&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;1&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;9380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:15&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;14900&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.67&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;2&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;9380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:30&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;14600&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.62&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;3&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;9380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:45&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;14200&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.55&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;4&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;9380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 01:00&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;14000&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.49&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;/div&gt;</code></pre>
-<p>Of course, the column headers are now wrong! We were planning to rename them, so let’s just do that during import:</p>
+<p>Of course, the column headers are now wrong! We were planning to rename them later, so let’s just do it during import instead:</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">new_column_names <span class="op">=</span> [<span class="st">&#39;Agency&#39;</span>, <span class="st">&#39;Station&#39;</span>, <span class="st">&#39;OldDateTime&#39;</span>, <span class="st">&#39;Timezone&#39;</span>, <span class="st">&#39;Discharge_cfs&#39;</span>, <span class="st">&#39;Discharge_stat&#39;</span>, <span class="st">&#39;Stage_ft&#39;</span>, <span class="st">&#39;Stage_stat&#39;</span>]
 
 data <span class="op">=</span> pd.read_csv(url, header<span class="op">=</span><span class="dv">1</span>, sep<span class="op">=</span><span class="st">&#39;</span><span class="ch">\t</span><span class="st">&#39;</span>, comment<span class="op">=</span><span class="st">&#39;#&#39;</span>, names <span class="op">=</span> new_column_names)
 data.head()</code></pre></div>
-<pre class="output"><code>&lt;div&gt;
-&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
-  &lt;thead&gt;
-    &lt;tr style=&quot;text-align: right;&quot;&gt;
-      &lt;th&gt;&lt;/th&gt;
-      &lt;th&gt;Agency&lt;/th&gt;
-      &lt;th&gt;Station&lt;/th&gt;
-      &lt;th&gt;OldDateTime&lt;/th&gt;
-      &lt;th&gt;Timezone&lt;/th&gt;
-      &lt;th&gt;Discharge_cfs&lt;/th&gt;
-      &lt;th&gt;Discharge_stat&lt;/th&gt;
-      &lt;th&gt;Stage_ft&lt;/th&gt;
-      &lt;th&gt;Stage_stat&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;th&gt;0&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;9380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:00&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;15200&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.74&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;1&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;9380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:15&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;14900&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.67&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;2&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;9380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:30&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;14600&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.62&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;3&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;9380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 00:45&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;14200&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.55&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;4&lt;/th&gt;
-      &lt;td&gt;USGS&lt;/td&gt;
-      &lt;td&gt;9380000&lt;/td&gt;
-      &lt;td&gt;2016-01-01 01:00&lt;/td&gt;
-      &lt;td&gt;MST&lt;/td&gt;
-      &lt;td&gt;14000&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-      &lt;td&gt;9.49&lt;/td&gt;
-      &lt;td&gt;P&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;/div&gt;</code></pre>
 <aside class="callout panel panel-info">
 <div class="panel-heading">
 <h2 id="why-not-just-delete-the-bad-row"><span class="glyphicon glyphicon-pushpin"></span>Why not just delete the bad row?</h2>
 </div>
 <div class="panel-body">
-<p>In the previous lesson, we saw we could create new DataFrames that contained just a subset of the rows of an existing DataFrame. Why did we go through so much trouble to avoid importing the “bad” row in with the data?</p>
-<p>One consideration is memory space and speed. If we had simply copied the good rows into a new DataFrame, Python would have created a new copy of the data, occupying available memory and taking some time. While the extra computational expenses are negligible for these small datasets, they quickly add up! By fixing those issues as we are importing the data, we create only one copy of the DataFrame from the start.</p>
-<p>The second concern is less obvious but could potentially complicate how we handle the data later on. Each column in the DataFrame has a data type that restricts what can be done with the data (check them with <code>data.dtypes</code>). Columns of the type <code>object</code>, for example, contain strings and cannot be used in mathematical expressions. When the “bad” row was included in the data, the first entry in the columns for stage and discharge were “14n”, forcing Pandas to consider every entry in those columns to be a string instead of an integer or float.</p>
+<p>In the previous lesson, we saw we could create new DataFrames that contained just a subset of the rows of an existing DataFrame. Why did we go through so much trouble to avoid importing the “bad” row?</p>
+<p>One consideration is memory space and computational speed. If we had simply copied the good rows into a new DataFrame, Python would have had to create a new copy of all of the data (minus that row), occupying available memory and taking some time. While the extra computational expenses are negligible for these small datasets, they will quickly add up!.</p>
+<p>The second concern is less obvious but would complicate how we handle the data later on. Each column in the DataFrame has a data type (check them with <code>data.dtypes</code>). Columns of the type <code>object</code>, for example, contain strings and cannot be used in mathematical expressions. When the “bad” row was included in the data, the first entry in the columns for stage and discharge were “14n” instead of a number, forcing Pandas to consider every entry in those two columns to be a string instead of an integer or float.</p>
 </div>
 </aside>
-<p>Our script can now import data through the USGS web services in a format that we can use with our existing code! Let’s combine these commands with the code we wrote in the previous lesson. We can copy the old code, comment out (with the symbol #) any rows that we don’t want to use, and add our new commands:</p>
+<p>Our script can now import data through the USGS web services and produce an object that can be used with the code we wrote before. Let’s combine these commands with the existing code and <a href="reference.html#comment">comment</a> (with the symbol #) any rows that we don’t need anymore:</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> pandas <span class="im">as</span> pd
 <span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt
 <span class="op">%</span>matplotlib inline
