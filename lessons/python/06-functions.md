@@ -505,3 +505,10 @@ a: 1 b: 2 c: 77
 > but will allow the caller to specify lower and upper bounds if they want.
 > Compare your implementation to your neighbor's:
 > do the two functions always behave the same way?
+
+
+> ## Grand Challenge! {.challenge}
+>
+> * Turn your code into a function that takes a station number, start date, and end date as arguments.
+> * Write a for loop that passes your new function multiple station names one by one and saves figures for each of them.
+> * Wrap the call to your plotting function in a conditional statement. Add an argument (a boolean - True or False) to the outer function for turning plotting on and off. Give it a default value of True and test calling your function.
