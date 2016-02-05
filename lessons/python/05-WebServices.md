@@ -361,6 +361,4 @@ plt.ylabel('Discharge (cfs)')
 plt.savefig('data/discharge_' + new_station_name + '.png')
 plt.show()
 ~~~
-~~~ {.output}
 ![png](fig/output_23_0.png)
-~~~

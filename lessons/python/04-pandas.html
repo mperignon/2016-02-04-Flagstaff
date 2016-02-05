@@ -163,19 +163,25 @@ With loc: (3, 2)</code></pre>
 
 plt.plot(data[<span class="st">&#39;DateTime&#39;</span>], data[<span class="st">&#39;Discharge_cfs&#39;</span>])
 plt.title(<span class="st">&#39;Station &#39;</span> <span class="op">+</span> data[<span class="st">&#39;Station&#39;</span>][<span class="dv">0</span>])</code></pre></div>
-<pre class="output"><code>&lt;matplotlib.text.Text at 0x10a6884d0&gt;
-![png](fig/output_37_1.png)</code></pre>
+<div class="figure">
+<img src="fig/output_37_1.png" alt="png" />
+<p class="caption">png</p>
+</div>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data.plot(x<span class="op">=</span><span class="st">&#39;DateTime&#39;</span>, y<span class="op">=</span><span class="st">&#39;Discharge_cfs&#39;</span>, title<span class="op">=</span><span class="st">&#39;Station &#39;</span> <span class="op">+</span> data[<span class="st">&#39;Station&#39;</span>][<span class="dv">0</span>])</code></pre></div>
-<pre class="output"><code>&lt;matplotlib.axes._subplots.AxesSubplot at 0x109eec810&gt;
-![png](fig/output_38_1.png)</code></pre>
+<div class="figure">
+<img src="fig/output_38_1.png" alt="png" />
+<p class="caption">png</p>
+</div>
 <p>We can use <code>pyplot</code> methods to customize the Pandas plot and save the figure:</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">data.plot(x<span class="op">=</span><span class="st">&#39;DateTime&#39;</span>, y<span class="op">=</span><span class="st">&#39;Discharge_cfs&#39;</span>, title<span class="op">=</span><span class="st">&#39;Station &#39;</span> <span class="op">+</span> data[<span class="st">&#39;Station&#39;</span>][<span class="dv">0</span>])
 plt.xlabel(<span class="st">&#39;Time&#39;</span>)
 plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
 plt.show()
 plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> data[<span class="st">&#39;Station&#39;</span>][<span class="dv">0</span>] <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)</code></pre></div>
-<pre class="output"><code>![png](fig/output_40_0.png)
-&lt;matplotlib.figure.Figure at 0x10b205890&gt;</code></pre>
+<div class="figure">
+<img src="fig/output_40_0.png" alt="png" />
+<p class="caption">png</p>
+</div>
 <h3 id="putting-it-all-together">Putting it all together</h3>
 <p>Let’s go back through the code we’ve written and put together the commands we need to import data and make a plot of discharge:</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> pandas <span class="im">as</span> pd
@@ -197,7 +203,10 @@ plt.xlabel(<span class="st">&#39;Time&#39;</span>)
 plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
 plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> new_station_name <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)
 plt.show()</code></pre></div>
-<pre class="output"><code>![png](fig/output_42_0.png)</code></pre>
+<div class="figure">
+<img src="fig/output_42_0.png" alt="png" />
+<p class="caption">png</p>
+</div>
         </div>
       </div>
       </article>

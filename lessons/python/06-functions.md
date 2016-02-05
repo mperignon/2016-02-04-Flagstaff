@@ -34,9 +34,7 @@ plt.ylabel('Discharge (cfs)')
 plt.savefig('data/discharge_' + new_station_name + '.png')
 plt.show()
 ~~~
-~~~ {.output}
 ![png](fig/output_1_0.png)
-~~~
 
 The station number and date range we are interested in are part of the URL that we use to communicate with the web services. The specific file we receive when we call the `read_csv` function doesn't exist until we request it -- when our script calls for some data, the server reads the URL to see what we want, pulls data from a database, packages it into a file, and passes it on to us. The API (the protocol that governs communication between machines) establishes a "formula" for writing the URL, so as long as we follow that formula (and request data that exists), the server will provide it for us.
 
@@ -162,9 +160,7 @@ plt.ylabel('Discharge (cfs)')
 plt.savefig('data/discharge_' + new_station_name + '.png')
 plt.show()
 ~~~
-~~~ {.output}
 ![png](fig/output_11_0.png)
-~~~
 
 ### Creating Functions
 
@@ -400,9 +396,7 @@ data = import_streamgage_data(url)
 plot_discharge(data)
 
 ~~~
-~~~ {.output}
 ![png](fig/output_38_0.png)
-~~~
 
 ### Testing and Documenting
 

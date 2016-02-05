@@ -61,7 +61,10 @@ plt.xlabel(<span class="st">&#39;Time&#39;</span>)
 plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
 plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> new_station_name <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)
 plt.show()</code></pre></div>
-<pre class="output"><code>![png](fig/output_1_0.png)</code></pre>
+<div class="figure">
+<img src="fig/output_1_0.png" alt="png" />
+<p class="caption">png</p>
+</div>
 <p>The station number and date range we are interested in are part of the URL that we use to communicate with the web services. The specific file we receive when we call the <code>read_csv</code> function doesn’t exist until we request it – when our script calls for some data, the server reads the URL to see what we want, pulls data from a database, packages it into a file, and passes it on to us. The API (the protocol that governs communication between machines) establishes a “formula” for writing the URL, so as long as we follow that formula (and request data that exists), the server will provide it for us.</p>
 <p>To understand how it’s built, let’s decompose the URL into parts and combine them back into a single string:</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">url_root <span class="op">=</span> <span class="st">&#39;http://waterservices.usgs.gov/nwis/iv/?&#39;</span> <span class="co"># root of URL</span>
@@ -161,7 +164,10 @@ plt.xlabel(<span class="st">&#39;Time&#39;</span>)
 plt.ylabel(<span class="st">&#39;Discharge (cfs)&#39;</span>)
 plt.savefig(<span class="st">&#39;data/discharge_&#39;</span> <span class="op">+</span> new_station_name <span class="op">+</span> <span class="st">&#39;.png&#39;</span>)
 plt.show()</code></pre></div>
-<pre class="output"><code>![png](fig/output_11_0.png)</code></pre>
+<div class="figure">
+<img src="fig/output_11_0.png" alt="png" />
+<p class="caption">png</p>
+</div>
 <h3 id="creating-functions">Creating Functions</h3>
 <p>If we wanted to import data from a different station or for a different date range using this code, we would manually change the first three variables and run the code again. It would be a lot less work than having to download the file and plot it by hand, but it could still be very tedious! At this point, our code is also getting long and complicated; what if we had thousands of datasets but didn’t want to generate a figure for every single one? Commenting out the figure-drawing code is a nuisance and we might accidentally comment out the wrong lines. Also, what if we want to use that code again, on data with a slightly different format or at a different point in our program? Cutting and pasting code would make it very long and repetitive quickly and probably lead to errors.</p>
 <p>We’d like to package our code so that it is easier to reuse. Python provides for this by letting us define things called <strong>functions</strong>, which create a shorthand way of re-executing longer pieces of code.</p>
@@ -323,7 +329,10 @@ endDate <span class="op">=</span> <span class="st">&#39;2016-01-10&#39;</span>
 url <span class="op">=</span> generate_URL(this_station, startDate, endDate)
 data <span class="op">=</span> import_streamgage_data(url)
 plot_discharge(data)</code></pre></div>
-<pre class="output"><code>![png](fig/output_38_0.png)</code></pre>
+<div class="figure">
+<img src="fig/output_38_0.png" alt="png" />
+<p class="caption">png</p>
+</div>
 <h3 id="testing-and-documenting">Testing and Documenting</h3>
 <p>It doesn’t take long to forget what some code we wrote in the past was supposed to do. We should always write some documentation for our functions to remind ourselves (and others) what they do and how they are supposed to be used.</p>
 <p>The usual way to put documentation in software is to add comments:</p>

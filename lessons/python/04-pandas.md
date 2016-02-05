@@ -222,18 +222,12 @@ import matplotlib.pyplot as plt
 plt.plot(data['DateTime'], data['Discharge_cfs'])
 plt.title('Station ' + data['Station'][0])
 ~~~
-~~~ {.output}
-<matplotlib.text.Text at 0x10a6884d0>
 ![png](fig/output_37_1.png)
-~~~
 
 ~~~ {.python}
 data.plot(x='DateTime', y='Discharge_cfs', title='Station ' + data['Station'][0])
 ~~~
-~~~ {.output}
-<matplotlib.axes._subplots.AxesSubplot at 0x109eec810>
 ![png](fig/output_38_1.png)
-~~~
 
 We can use `pyplot` methods to customize the Pandas plot and save the figure:
 
@@ -244,10 +238,8 @@ plt.ylabel('Discharge (cfs)')
 plt.show()
 plt.savefig('data/discharge_' + data['Station'][0] + '.png')
 ~~~
-~~~ {.output}
 ![png](fig/output_40_0.png)
-<matplotlib.figure.Figure at 0x10b205890>
-~~~
+
 
 ### Putting it all together
 
@@ -274,6 +266,4 @@ plt.ylabel('Discharge (cfs)')
 plt.savefig('data/discharge_' + new_station_name + '.png')
 plt.show()
 ~~~
-~~~ {.output}
 ![png](fig/output_42_0.png)
-~~~
